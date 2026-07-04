@@ -3,21 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MoTechCo Resume Analyzer</title>
+  <title>Free AI Resume Analyzer &amp; ATS Checker | MoTechCo</title>
+  <meta name="description" content="Upload your resume and get a free AI score, ATS keyword feedback, and job description match. Premium full report from MoTechCo." />
+  <meta name="keywords" content="resume analyzer, ATS checker, AI resume review, job match, MoTechCo, resume score" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://resume.motechco.ca/index.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="MoTechCo AI Resume Analyzer" />
+  <meta property="og:description" content="Get a free resume score, ATS tips, and job-match analysis in one click." />
+  <meta property="og:url" content="https://resume.motechco.ca/index.html" />
+  <meta property="og:site_name" content="MoTechCo" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="MoTechCo AI Resume Analyzer" />
+  <meta name="twitter:description" content="Free AI resume score + premium ATS and job-match report." />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <nav class="top-nav">
+    <a class="brand" href="landing.html">MoTechCo</a>
+    <div class="nav-links">
+      <a href="landing.html">Home</a>
+      <a href="index.html" aria-current="page">Analyzer</a>
+    </div>
+  </nav>
+
   <header class="header">
-    <h1>MoTechCo Resume Analyzer</h1>
-    <p>Soft. Smart. Lilac-powered AI for your career.</p>
+    <div class="header-inner">
+      <span id="premiumBadge" class="premium-badge" hidden>Premium unlocked</span>
+      <h1>MoTechCo Resume Analyzer</h1>
+      <p>Free score. Premium ATS + job-match report. Built for tech and data roles.</p>
+      <div id="scoreBadge" class="score-badge" hidden>--/100</div>
+    </div>
   </header>
 
   <main>
     <section class="card">
       <h2>Upload Resume</h2>
-      <p class="helper-text">Choose a .pdf or .docx file, then click <strong>Upload &amp; Analyze</strong>. We'll extract your text and run AI feedback automatically.</p>
+      <p class="helper-text">Choose a .pdf or .docx file, optionally paste a job description, then click <strong>Upload &amp; Analyze</strong>.</p>
+
+      <label class="field-label" for="jobDescription">Target job description (optional — unlocks job-match analysis)</label>
+      <textarea id="jobDescription" rows="5" placeholder="Paste the job posting here to see how well your resume matches that role..."></textarea>
+
       <form id="uploadForm" enctype="multipart/form-data">
+        <label class="field-label" for="resume">Resume file</label>
         <input type="file" id="resume" name="resume" accept=".pdf,.docx" required />
         <div class="actions">
           <button type="submit" id="submitBtn">Upload &amp; Analyze</button>
@@ -27,6 +57,31 @@
 
       <div id="loading" class="loading">Working...</div>
       <p id="loadingNote" class="loading-note"></p>
+
+      <div id="paywallBox" class="paywall-box" hidden>
+        <h3>Unlock your full AI report</h3>
+        <p>Free users see your score and top strengths. Premium unlocks weaknesses, ATS keywords, formatting fixes, and job-match insights.</p>
+        <ul>
+          <li>Full weaknesses breakdown</li>
+          <li>Complete keyword gap analysis</li>
+          <li>Formatting suggestions</li>
+          <li>Job description match score</li>
+          <li>Shareable score card for LinkedIn</li>
+        </ul>
+        <button type="button" id="unlockBtn" class="unlock-btn">Unlock Full Report — $4.99</button>
+        <p class="fine-print">Secure checkout via Stripe. We don't store your resume.</p>
+      </div>
+
+      <div id="sharePanel" class="share-panel" hidden>
+        <h3>Share your score</h3>
+        <p class="section-note">Drive traffic and show off your progress — perfect for LinkedIn.</p>
+        <div class="share-actions">
+          <button type="button" id="downloadCardBtn" class="secondary-btn">Download Score Card</button>
+          <button type="button" id="copyShareBtn" class="secondary-btn">Copy Share Text</button>
+          <button type="button" id="linkedinShareBtn" class="secondary-btn">Share on LinkedIn</button>
+          <button type="button" id="twitterShareBtn" class="secondary-btn">Share on X</button>
+        </div>
+      </div>
 
       <h3>Parsed Text</h3>
       <p class="section-note">Extracted from your uploaded file.</p>
@@ -39,9 +94,11 @@
   </main>
 
   <footer class="footer">
-    <p>© 2026 MoTechCo — Built with love in lilac & purple 💜</p>
+    <p>© 2026 MoTechCo — Built with love in lilac & purple</p>
+    <p class="footer-links"><a href="landing.html">Home</a> · <a href="https://resume.motechco.ca">Share this tool</a></p>
   </footer>
 
+  <script src="share.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

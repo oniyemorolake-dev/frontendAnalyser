@@ -3,131 +3,100 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MoTechCo</title>
+  <title>MoTechCo | Free AI Resume Analyzer &amp; ATS Checker</title>
+  <meta name="description" content="MoTechCo helps job seekers score their resume, find ATS keyword gaps, and match against job descriptions using AI. Free score, premium full report." />
+  <meta name="keywords" content="resume analyzer, ATS resume checker, AI resume feedback, job description match, tech resume, data annotation resume" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://resume.motechco.ca/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="MoTechCo — AI Resume Analyzer" />
+  <meta property="og:description" content="Upload your resume. Get a free AI score, ATS tips, and job-match analysis." />
+  <meta property="og:url" content="https://resume.motechco.ca/" />
+  <meta property="og:site_name" content="MoTechCo" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="MoTechCo AI Resume Analyzer" />
+  <meta name="twitter:description" content="Free resume score + premium ATS and job-match report." />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: #f7f2fa;
-      color: #3a2a3f;
-    }
-
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 40px;
-      background: white;
-      box-shadow: 0 2px 6px rgba(106, 13, 173, 0.1);
-    }
-
-    nav a {
-      text-decoration: none;
-      color: #7a2bb8;
-      font-weight: 600;
-      margin-left: 20px;
-    }
-
-    .hero {
-      text-align: center;
-      padding: 80px 20px;
-      background: linear-gradient(135deg, #c8a2c8, #b57edc);
-      color: white;
-      border-bottom-left-radius: 40px;
-      border-bottom-right-radius: 40px;
-      box-shadow: 0 4px 12px rgba(106, 13, 173, 0.2);
-    }
-
-    .hero p {
-      font-size: 18px;
-      margin-top: 10px;
-      margin-bottom: 30px;
-    }
-
-    .cta-btn {
-      background: white;
-      color: #7a2bb8;
-      padding: 14px 28px;
-      border-radius: 8px;
-      font-size: 18px;
-      font-weight: 600;
-      text-decoration: none;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-      transition: 0.2s ease;
-    }
-
-    .cta-btn:hover {
-      background: #f3e8ff;
-    }
-
-    .features {
-      padding: 60px 20px;
-      text-align: center;
-    }
-
-    .features h2 {
-      color: #7a2bb8;
-      margin-bottom: 30px;
-    }
-
-    .feature-box {
-      background: white;
-      padding: 25px;
-      margin: 20px auto;
-      width: 80%;
-      border-radius: 12px;
-      border: 2px solid #e6d7f5;
-      box-shadow: 0 4px 10px rgba(106, 13, 173, 0.1);
-    }
-
-    footer {
-      margin-top: 40px;
-      padding: 20px;
-      background: linear-gradient(135deg, #c8a2c8, #b57edc);
-      color: white;
-      text-align: center;
-      border-radius: 10px;
-      font-size: 14px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <nav>
-    <div><strong>MoTechCo</strong></div>
-    <div>
-      <a href="landing.html">Home</a>
-      <a href="index.html">Resume Analyzer</a>
+<body class="landing-page">
+  <nav class="top-nav">
+    <a class="brand" href="landing.html">MoTechCo</a>
+    <div class="nav-links">
+      <a href="landing.html" aria-current="page">Home</a>
+      <a href="index.html">Analyzer</a>
     </div>
   </nav>
 
-  <section class="hero">
-    <h1>MoTechCo</h1>
-    <p>Soft. Smart. Lilac-powered AI for your career.</p>
-    <a href="index.html" class="cta-btn">Start Resume Analysis</a>
+  <section class="hero landing-hero">
+    <p class="eyebrow">Free AI resume score · Premium ATS report</p>
+    <h1>Get hired faster with lilac-powered resume intelligence</h1>
+    <p class="hero-copy">Upload your resume, paste a job description, and get instant AI feedback on ATS keywords, formatting, and role fit. Share your score on LinkedIn and stand out.</p>
+    <div class="hero-actions">
+      <a href="index.html" class="cta-btn primary-cta">Analyze My Resume — Free</a>
+      <a href="index.html#premium" class="cta-btn secondary-cta">See Premium Report</a>
+    </div>
+    <p class="trust-line">No account required · .pdf and .docx supported · Resume text is processed, not stored</p>
   </section>
 
-  <section class="features">
-    <h2>Why MoTechCo?</h2>
-    <div class="feature-box">
-      <h3>AI-Powered Resume Insights</h3>
-      <p>Get smart, personalized feedback to improve your resume instantly.</p>
-    </div>
-    <div class="feature-box">
-      <h3>Beautiful Lilac Experience</h3>
-      <p>A soft, elegant interface designed to make job searching feel calm.</p>
-    </div>
-    <div class="feature-box">
-      <h3>Fast & Accurate</h3>
-      <p>Upload your resume and get analysis in seconds.</p>
+  <section class="features landing-features">
+    <h2>Why job seekers use MoTechCo</h2>
+    <div class="feature-grid">
+      <article class="feature-box">
+        <h3>Free AI Resume Score</h3>
+        <p>See your overall score and top strengths instantly — perfect for quick checks before applying.</p>
+      </article>
+      <article class="feature-box">
+        <h3>Job Description Match</h3>
+        <p>Paste any job posting and discover keyword gaps between your resume and the role.</p>
+      </article>
+      <article class="feature-box">
+        <h3>Premium ATS Report</h3>
+        <p>Unlock weaknesses, formatting fixes, and full keyword analysis for a one-time premium report.</p>
+      </article>
+      <article class="feature-box">
+        <h3>Shareable Score Card</h3>
+        <p>Download a branded score card and share your progress on LinkedIn or X to build momentum.</p>
+      </article>
     </div>
   </section>
 
-  <footer>
-    © 2026 MoTechCo - Built with love in lilac & purple
+  <section class="pricing-section" id="premium">
+    <h2>Simple pricing</h2>
+    <div class="pricing-grid">
+      <article class="pricing-card">
+        <h3>Free</h3>
+        <p class="price">$0</p>
+        <ul>
+          <li>Overall resume score</li>
+          <li>Top 3 strengths preview</li>
+          <li>Resume text extraction</li>
+        </ul>
+        <a href="index.html" class="cta-btn secondary-cta">Start Free</a>
+      </article>
+      <article class="pricing-card featured">
+        <h3>Premium Report</h3>
+        <p class="price">$4.99</p>
+        <ul>
+          <li>Full weaknesses + keyword gaps</li>
+          <li>Formatting suggestions</li>
+          <li>Job description match score</li>
+          <li>Downloadable share card</li>
+        </ul>
+        <a href="index.html" class="cta-btn primary-cta">Unlock Full Report</a>
+      </article>
+    </div>
+  </section>
+
+  <section class="seo-copy">
+    <h2>Built for tech, data, and career switchers</h2>
+    <p>MoTechCo is an AI resume analyzer and ATS checker designed for software, data annotation, IT, and early-career professionals. Whether you're optimizing for applicant tracking systems or tailoring your resume to a specific job description, MoTechCo gives actionable feedback in seconds.</p>
+  </section>
+
+  <footer class="footer landing-footer">
+    <p>© 2026 MoTechCo — Built with love in lilac & purple</p>
+    <p class="footer-links"><a href="index.html">Resume Analyzer</a> · <a href="https://resume.motechco.ca">resume.motechco.ca</a></p>
   </footer>
 </body>
 </html>
