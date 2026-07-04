@@ -3,6 +3,7 @@ const loading = document.getElementById("loading");
 const output = document.getElementById("output");
 const analyzeBtn = document.getElementById("analyzeBtn");
 const analysisOutput = document.getElementById("analysisOutput");
+const API_BASE = "https://backendaianalysers.onrender.com";
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -21,7 +22,7 @@ form.addEventListener("submit", async (e) => {
   formData.append("resume", fileInput.files[0]);
 
   try {
-    const res = await fetch("http://localhost:5000/api/resume/upload", {
+    const res = await fetch(`${API_BASE}/api/resume/upload`, {
       method: "POST",
       body: formData,
     });
@@ -47,7 +48,7 @@ analyzeBtn.addEventListener("click", async () => {
   analysisOutput.textContent = "";
 
   try {
-    const res = await fetch("http://localhost:5000/api/resume/analyze", {
+    const res = await fetch(`${API_BASE}/api/resume/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: resumeText }),
