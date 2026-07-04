@@ -1,0 +1,104 @@
+body {
+  margin: 0;
+  font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+  background: #f7f2fa;
+  color: #3a2a3f;
+}
+
+.header {
+  text-align: center;
+  padding: 36px 20px;
+  background: linear-gradient(135deg, #b57edc, #9b4dcc);
+  color: white;
+  box-shadow: 0 4px 10px rgba(106, 13, 173, 0.15);
+}
+
+.header h1 {
+  margin: 0 0 8px;
+}
+
+main {
+  padding: 30px 16px;
+}
+
+.card {
+  max-width: 760px;
+  margin: 0 auto;
+  background: white;
+  border: 2px solid #e6d7f5;
+  border-radius: 14px;
+  box-shadow: 0 6px 14px rgba(106, 13, 173, 0.1);
+  padding: 24px;
+}
+
+h2,
+h3 {
+  color: #6a0dad;
+}
+
+.actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+button {
+  background-color: #9b4dcc;
+  color: white;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.2s ease;
+}
+
+button:hover {
+  background-color: #7a2bb8;
+}
+
+.loading {
+  display: none;
+  margin-top: 20px;
+  font-weight: 600;
+  color: #7a2bb8;
+  background: #f3e8ff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  width: fit-content;
+  border: 2px solid #e2c8ff;
+  box-shadow: 0 2px 6px rgba(106, 13, 173, 0.15);
+  animation: pulse 1.2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.9; }
+}
+
+pre {
+  text-align: left;
+  background: #f3e8ff;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #e2c8ff;
+  min-height: 72px;
+  white-space: pre-wrap;
+}
+
+#analysisOutput {
+  background: #f7eaff;
+  border-color: #d7b3f8;
+  color: #4a2a6a;
+}
+
+.footer {
+  margin: 24px;
+  padding: 16px;
+  background: linear-gradient(135deg, #c8a2c8, #b57edc);
+  color: white;
+  text-align: center;
+  border-radius: 10px;
+}

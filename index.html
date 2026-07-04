@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoTechCo Resume Analyzer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <h1>MoTechCo Resume Analyzer</h1>
+    <p>Soft. Smart. Lilac-powered AI for your career.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Upload Resume</h2>
+      <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="resume" name="resume" accept=".pdf,.docx" required />
+        <div class="actions">
+          <button type="submit">Upload</button>
+          <button type="button" id="analyzeBtn">Analyze Resume</button>
+        </div>
+      </form>
+
+      <div id="loading" class="loading">Analyzing your resume... ⏳</div>
+
+      <h3>Parsed Text</h3>
+      <pre id="output"></pre>
+
+      <h3>AI Analysis</h3>
+      <pre id="analysisOutput"></pre>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 MoTechCo — Built with love in lilac & purple 💜</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
