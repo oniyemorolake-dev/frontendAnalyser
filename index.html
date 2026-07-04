@@ -16,11 +16,12 @@
   <main>
     <section class="card">
       <h2>Upload Resume</h2>
+      <p class="helper-text">Choose a .pdf or .docx file, then click <strong>Upload &amp; Analyze</strong>. We'll extract your text and run AI feedback automatically.</p>
       <form id="uploadForm" enctype="multipart/form-data">
         <input type="file" id="resume" name="resume" accept=".pdf,.docx" required />
         <div class="actions">
-          <button type="submit">Upload</button>
-          <button type="button" id="analyzeBtn">Analyze Resume</button>
+          <button type="submit" id="submitBtn">Upload &amp; Analyze</button>
+          <button type="button" id="analyzeBtn" class="secondary-btn" style="display: none;">Re-analyze</button>
         </div>
       </form>
 
@@ -28,9 +29,11 @@
       <p id="loadingNote" class="loading-note"></p>
 
       <h3>Parsed Text</h3>
+      <p class="section-note">Extracted from your uploaded file.</p>
       <pre id="output"></pre>
 
       <h3>AI Analysis</h3>
+      <p class="section-note">Score, strengths, weaknesses, and suggestions from Gemini.</p>
       <pre id="analysisOutput"></pre>
     </section>
   </main>

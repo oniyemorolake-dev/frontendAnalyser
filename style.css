@@ -36,6 +36,19 @@ h3 {
   color: #6a0dad;
 }
 
+.helper-text,
+.section-note {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #6a5080;
+  line-height: 1.5;
+}
+
+.section-note {
+  margin-top: -4px;
+  margin-bottom: 8px;
+}
+
 .actions {
   margin-top: 12px;
   display: flex;
@@ -56,6 +69,16 @@ button {
 
 button:hover {
   background-color: #7a2bb8;
+}
+
+.secondary-btn {
+  background-color: white;
+  color: #7a2bb8;
+  border: 2px solid #c9a0e8;
+}
+
+.secondary-btn:hover {
+  background-color: #f3e8ff;
 }
 
 .loading {
