@@ -51,11 +51,11 @@ analyzeBtn.addEventListener("click", async () => {
     const res = await fetch(`${API_BASE}/api/resume/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: resumeText }),
+      body: JSON.stringify({ text: resumeText }),
     });
 
     const data = await res.json();
-    analysisOutput.textContent = data.analysis || "No analysis returned.";
+    analysisOutput.textContent = data.analysis || JSON.stringify(data, null, 2) || "No analysis returned.";
   } catch (err) {
     analysisOutput.textContent = "Analysis failed. Check backend/API key.";
   } finally {
