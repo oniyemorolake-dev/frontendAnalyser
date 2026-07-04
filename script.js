@@ -83,6 +83,7 @@ form.addEventListener("submit", async (e) => {
     }
 
     output.textContent = data.text || data.content || "Upload completed, but no text was extracted.";
+    output.scrollLeft = 0;
   } catch (err) {
     output.textContent = "Upload failed. The backend may be waking up — try again in a moment.";
   } finally {

@@ -91,6 +91,7 @@ button:disabled {
   max-width: 520px;
 }
 
+pre {
   text-align: left;
   background: #f3e8ff;
   padding: 14px;
@@ -98,6 +99,14 @@ button:disabled {
   border: 1px solid #e2c8ff;
   min-height: 72px;
   white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 #analysisOutput {
