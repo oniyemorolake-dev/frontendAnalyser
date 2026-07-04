@@ -19,7 +19,7 @@ form.addEventListener("submit", async (e) => {
   analysisOutput.textContent = "";
 
   const formData = new FormData();
-  formData.append("resume", fileInput.files[0]);
+  formData.append("file", fileInput.files[0]);
 
   try {
     const res = await fetch(`${API_BASE}/api/resume/upload`, {
@@ -28,7 +28,7 @@ form.addEventListener("submit", async (e) => {
     });
 
     const data = await res.json();
-    output.textContent = data.content || data.message || "Upload completed.";
+    output.textContent = data.text || data.content || data.message || "Upload completed.";
   } catch (err) {
     output.textContent = "Upload failed. Make sure backend is running.";
   } finally {
