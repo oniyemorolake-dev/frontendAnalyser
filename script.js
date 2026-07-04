@@ -9,17 +9,33 @@ const jobDescriptionInput = document.getElementById("jobDescription");
 const paywallBox = document.getElementById("paywallBox");
 const unlockBtn = document.getElementById("unlockBtn");
 const sharePanel = document.getElementById("sharePanel");
+const emailPanel = document.getElementById("emailPanel");
+const jobMatchPanel = document.getElementById("jobMatchPanel");
+const jobFitSummary = document.getElementById("jobFitSummary");
+const matchedKeywords = document.getElementById("matchedKeywords");
+const missingJobKeywords = document.getElementById("missingJobKeywords");
+const referralLink = document.getElementById("referralLink");
+const copyReferralBtn = document.getElementById("copyReferralBtn");
 const downloadCardBtn = document.getElementById("downloadCardBtn");
+const downloadReportBtn = document.getElementById("downloadReportBtn");
+const printReportBtn = document.getElementById("printReportBtn");
 const copyShareBtn = document.getElementById("copyShareBtn");
 const linkedinShareBtn = document.getElementById("linkedinShareBtn");
 const twitterShareBtn = document.getElementById("twitterShareBtn");
+const emailInput = document.getElementById("emailInput");
+const emailReportBtn = document.getElementById("emailReportBtn");
+const emailStatus = document.getElementById("emailStatus");
 const premiumBadge = document.getElementById("premiumBadge");
 const scoreBadge = document.getElementById("scoreBadge");
-const API_BASE = "https://backendaianalysers.onrender.com";
+
+const API_BASE = "https://backendalanalysers.onrender.com";
+const SITE_URL = "https://resume.motechco.ca";
 const UNLOCK_STORAGE_KEY = "motechco_unlock_token";
+const REF_CODE_STORAGE_KEY = "motechco_ref_code";
+const DEVICE_ID_STORAGE_KEY = "motechco_device_id";
 
 const ANALYSIS_PLACEHOLDER =
-  "Your AI feedback will appear here after you upload a resume. Free users get a score + preview. Unlock the full report to monetize your job search.";
+  "Your AI feedback will appear here after you upload a resume. Free users get a score + preview. Unlock the full report or use a referral link for premium.";
 
 const COLD_START_NOTE =
   "First request after idle may take up to 60 seconds on the free tier.";
@@ -28,6 +44,32 @@ let latestAnalysis = null;
 let pricing = { priceLabel: "$4.99", stripeConfigured: false };
 
 analysisOutput.textContent = ANALYSIS_PLACEHOLDER;
+
+function getDeviceId() {
+  let id = localStorage.getItem(DEVICE_ID_STORAGE_KEY);
+  if (!id) {
+    id = `dev_${Math.random().toString(36).slice(2)}_${Date.now()}`;
+    localStorage.setItem(DEVICE_ID_STORAGE_KEY, id);
+  }
+  return id;
+}
+
+function getMyReferralCode() {
+  let code = localStorage.getItem(REF_CODE_STORAGE_KEY);
+  if (!code) {
+    code = Math.random().toString(36).slice(2, 10).toLowerCase();
+    localStorage.setItem(REF_CODE_STORAGE_KEY, code);
+  }
+  return code;
+}
+
+function getReferralShareUrl() {
+  return `${SITE_URL}/index.html?ref=${getMyReferralCode()}`;
+}
+
+function setupReferralLinkField() {
+  if (referralLink) referralLink.value = getReferralShareUrl();
+}
 
 function getUnlockToken() {
   return sessionStorage.getItem(UNLOCK_STORAGE_KEY) || "";
@@ -48,17 +90,58 @@ function setLoading(active, message, note) {
   if (unlockBtn) unlockBtn.disabled = active;
 }
 
+function renderKeywordChips(container, items, className) {
+  container.innerHTML = "";
+  if (!Array.isArray(items) || items.length === 0) {
+    container.innerHTML = `<span class="keyword-empty">None detected yet.</span>`;
+    return;
+  }
+
+  items.forEach((item) => {
+    const chip = document.createElement("span");
+    chip.className = `keyword-chip ${className || ""}`.trim();
+    chip.textContent = item;
+    container.appendChild(chip);
+  });
+}
+
+function renderJobMatchPanel(data) {
+  const hasJobData =
+    typeof data.jobMatchScore === "number" ||
+    (Array.isArray(data.jobMatchedKeywords) && data.jobMatchedKeywords.length > 0) ||
+    (Array.isArray(data.jobMissingKeywords) && data.jobMissingKeywords.length > 0);
+
+  if (!hasJobData || (data.tier === "free" && data.locked)) {
+    jobMatchPanel.hidden = true;
+    return;
+  }
+
+  jobMatchPanel.hidden = false;
+  jobFitSummary.textContent = data.jobFitSummary
+    ? data.jobFitSummary
+    : typeof data.jobMatchScore === "number"
+      ? `Job match score: ${data.jobMatchScore}/100`
+      : "";
+
+  renderKeywordChips(matchedKeywords, data.jobMatchedKeywords, "matched");
+  renderKeywordChips(missingJobKeywords, data.jobMissingKeywords, "missing");
+}
+
 function renderSections(title, items) {
   if (!Array.isArray(items) || items.length === 0) return [];
   return [`${title}:`, ...items.map((item) => `  • ${item}`), ""];
 }
 
-function renderAnalysis(data) {
+function buildReportText(data) {
+  return renderAnalysis(data, true);
+}
+
+function renderAnalysis(data, forExport = false) {
   if (data.raw) {
     return `Could not parse structured feedback.\n\nRaw model output:\n${data.raw}`;
   }
 
-  const lines = [];
+  const lines = [`MoTechCo Resume Analyzer Report`, ""];
 
   if (typeof data.score === "number") {
     lines.push(`Overall Score: ${data.score}/100`, "");
@@ -73,7 +156,7 @@ function renderAnalysis(data) {
 
   lines.push(...renderSections("Strengths", data.strengths || data.strengthsPreview));
 
-  if (data.tier === "free" && data.locked) {
+  if (data.tier === "free" && data.locked && !forExport) {
     lines.push("Premium Preview Locked:", "  • Full weaknesses breakdown");
     lines.push("  • Complete ATS keyword list");
     lines.push("  • Formatting suggestions");
@@ -87,8 +170,9 @@ function renderAnalysis(data) {
   lines.push(...renderSections("Job Matched Keywords", data.jobMatchedKeywords));
   lines.push(...renderSections("Job Missing Keywords", data.jobMissingKeywords));
   lines.push(...renderSections("Formatting Suggestions", data.formattingSuggestions));
+  lines.push("", SITE_URL);
 
-  if (lines.length === 0) return JSON.stringify(data, null, 2);
+  if (lines.length <= 3) return JSON.stringify(data, null, 2);
   return lines.join("\n").trim();
 }
 
@@ -96,6 +180,7 @@ function updateResultsUi(data) {
   latestAnalysis = data;
   analysisOutput.textContent = renderAnalysis(data);
   analyzeBtn.style.display = "inline-block";
+  renderJobMatchPanel(data);
 
   if (typeof data.score === "number") {
     scoreBadge.hidden = false;
@@ -106,8 +191,12 @@ function updateResultsUi(data) {
 
   const isPremium = data.tier === "premium" || data.locked === false;
   premiumBadge.hidden = !isPremium;
+  premiumBadge.textContent = getUnlockToken().startsWith("referral_")
+    ? "Referral premium unlocked"
+    : "Premium unlocked";
   paywallBox.hidden = isPremium;
   sharePanel.hidden = !isPremium;
+  emailPanel.hidden = !isPremium;
 
   if (!isPremium && unlockBtn) {
     unlockBtn.textContent = `Unlock Full Report — ${pricing.priceLabel}`;
@@ -116,6 +205,26 @@ function updateResultsUi(data) {
 
 function isValidResumeText(text) {
   return text && !text.startsWith("Please choose") && !text.startsWith("Upload failed");
+}
+
+function downloadTextFile(filename, text) {
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function printReport() {
+  if (!latestAnalysis) return;
+  const popup = window.open("", "_blank", "noopener,noreferrer,width=800,height=900");
+  if (!popup) return;
+  popup.document.write(`<pre style="font-family:Segoe UI,Arial,sans-serif;white-space:pre-wrap;padding:24px;">${buildReportText(latestAnalysis).replace(/</g, "&lt;")}</pre>`);
+  popup.document.close();
+  popup.focus();
+  popup.print();
 }
 
 async function loadPricing() {
@@ -128,6 +237,36 @@ async function loadPricing() {
 
   if (unlockBtn) {
     unlockBtn.textContent = `Unlock Full Report — ${pricing.priceLabel}`;
+  }
+}
+
+async function redeemReferralFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get("ref");
+  if (!ref) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/resume/referral/redeem`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refCode: ref, deviceId: getDeviceId() }),
+    });
+    const data = await res.json();
+
+    if (res.ok && data.unlockToken) {
+      setUnlockToken(data.unlockToken);
+      premiumBadge.hidden = false;
+      premiumBadge.textContent = "Referral premium unlocked";
+      if (output.textContent.trim()) {
+        await runAnalysis(output.textContent.trim());
+      }
+    }
+  } catch (_) {
+    /* ignore */
+  } finally {
+    params.delete("ref");
+    const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+    window.history.replaceState({}, "", next);
   }
 }
 
@@ -197,6 +336,8 @@ async function runAnalysis(resumeText) {
   analysisOutput.textContent = "Generating AI feedback...";
   paywallBox.hidden = true;
   sharePanel.hidden = true;
+  emailPanel.hidden = true;
+  jobMatchPanel.hidden = true;
 
   const payload = {
     text: resumeText,
@@ -230,6 +371,43 @@ async function runAnalysis(resumeText) {
   }
 }
 
+async function sendEmailReport() {
+  if (!latestAnalysis) return;
+
+  const email = emailInput.value.trim();
+  if (!email) {
+    emailStatus.textContent = "Enter a valid email address.";
+    return;
+  }
+
+  emailReportBtn.disabled = true;
+  emailStatus.textContent = "Sending...";
+
+  try {
+    const res = await fetch(`${API_BASE}/api/resume/email-report`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        score: latestAnalysis.score ?? null,
+        reportText: buildReportText(latestAnalysis),
+      }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      emailStatus.textContent = data.error || "Could not send report.";
+      return;
+    }
+
+    emailStatus.textContent = data.message || "Report request received.";
+  } catch (_) {
+    emailStatus.textContent = "Could not send report right now.";
+  } finally {
+    emailReportBtn.disabled = false;
+  }
+}
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -245,6 +423,8 @@ form.addEventListener("submit", async (e) => {
   analyzeBtn.style.display = "none";
   paywallBox.hidden = true;
   sharePanel.hidden = true;
+  emailPanel.hidden = true;
+  jobMatchPanel.hidden = true;
   scoreBadge.hidden = true;
 
   const formData = new FormData();
@@ -286,6 +466,20 @@ analyzeBtn.addEventListener("click", async () => {
 
 if (unlockBtn) unlockBtn.addEventListener("click", startCheckout);
 
+if (copyReferralBtn) {
+  copyReferralBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(getReferralShareUrl());
+      copyReferralBtn.textContent = "Copied!";
+      setTimeout(() => {
+        copyReferralBtn.textContent = "Copy Referral Link";
+      }, 1800);
+    } catch (_) {
+      referralLink.select();
+    }
+  });
+}
+
 if (downloadCardBtn) {
   downloadCardBtn.addEventListener("click", () => {
     if (!latestAnalysis) return;
@@ -293,10 +487,20 @@ if (downloadCardBtn) {
   });
 }
 
+if (downloadReportBtn) {
+  downloadReportBtn.addEventListener("click", () => {
+    if (!latestAnalysis) return;
+    downloadTextFile("motechco-resume-report.txt", buildReportText(latestAnalysis));
+  });
+}
+
+if (printReportBtn) printReportBtn.addEventListener("click", printReport);
+if (emailReportBtn) emailReportBtn.addEventListener("click", sendEmailReport);
+
 if (copyShareBtn) {
   copyShareBtn.addEventListener("click", async () => {
     if (!latestAnalysis) return;
-    const text = window.MoTechCoShare.buildShareText(latestAnalysis);
+    const text = `${window.MoTechCoShare.buildShareText(latestAnalysis)}\nReferral: ${getReferralShareUrl()}`;
     try {
       await navigator.clipboard.writeText(text);
       copyShareBtn.textContent = "Copied!";
@@ -325,5 +529,7 @@ if (twitterShareBtn) {
   });
 }
 
+setupReferralLinkField();
 loadPricing();
+redeemReferralFromUrl();
 verifyPaymentFromUrl();

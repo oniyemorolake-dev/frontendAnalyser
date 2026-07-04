@@ -374,6 +374,80 @@ pre {
   line-height: 1.7;
 }
 
+.legal-page {
+  padding: 30px 16px;
+}
+
+.legal-page h1 {
+  color: #6a0dad;
+}
+
+.referral-panel,
+.email-panel,
+.job-match-panel {
+  margin: 20px 0;
+  padding: 18px;
+  border-radius: 12px;
+  border: 2px solid #dfc2f8;
+  background: #fbf8ff;
+}
+
+.referral-row,
+.email-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.referral-row input,
+.email-row input {
+  flex: 1 1 260px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid #d7b3f8;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.keyword-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.keyword-columns h4 {
+  margin: 0 0 10px;
+  color: #6a0dad;
+}
+
+.keyword-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.keyword-chip {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #e8f7ea;
+  color: #255032;
+  border: 1px solid #b9dfbf;
+  font-size: 13px;
+}
+
+.keyword-chip.missing,
+.keyword-list.missing .keyword-chip {
+  background: #fff0f0;
+  color: #7a2d2d;
+  border-color: #efbaba;
+}
+
+.keyword-empty {
+  color: #6a5080;
+  font-size: 14px;
+}
+
 .landing-footer {
   margin-top: 0;
 }

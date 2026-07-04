@@ -69,18 +69,54 @@
           <li>Shareable score card for LinkedIn</li>
         </ul>
         <button type="button" id="unlockBtn" class="unlock-btn">Unlock Full Report — $4.99</button>
-        <p class="fine-print">Secure checkout via Stripe. We don't store your resume.</p>
+        <p class="fine-print">Secure checkout via Stripe. <a href="privacy.html">Privacy policy</a></p>
+      </div>
+
+      <div id="referralPanel" class="referral-panel">
+        <h3>Refer a friend</h3>
+        <p class="section-note">Share your link — friends get one free premium report for 24 hours.</p>
+        <div class="referral-row">
+          <input id="referralLink" type="text" readonly />
+          <button type="button" id="copyReferralBtn" class="secondary-btn">Copy Referral Link</button>
+        </div>
+      </div>
+
+      <div id="jobMatchPanel" class="job-match-panel" hidden>
+        <h3>Job Match Breakdown</h3>
+        <p id="jobFitSummary" class="section-note"></p>
+        <div class="keyword-columns">
+          <div>
+            <h4>Matched keywords</h4>
+            <div id="matchedKeywords" class="keyword-list"></div>
+          </div>
+          <div>
+            <h4>Missing keywords</h4>
+            <div id="missingJobKeywords" class="keyword-list missing"></div>
+          </div>
+        </div>
       </div>
 
       <div id="sharePanel" class="share-panel" hidden>
-        <h3>Share your score</h3>
-        <p class="section-note">Drive traffic and show off your progress — perfect for LinkedIn.</p>
+        <h3>Share &amp; export</h3>
+        <p class="section-note">Drive traffic and keep a copy of your results.</p>
         <div class="share-actions">
           <button type="button" id="downloadCardBtn" class="secondary-btn">Download Score Card</button>
+          <button type="button" id="downloadReportBtn" class="secondary-btn">Download Report (.txt)</button>
+          <button type="button" id="printReportBtn" class="secondary-btn">Print / Save PDF</button>
           <button type="button" id="copyShareBtn" class="secondary-btn">Copy Share Text</button>
           <button type="button" id="linkedinShareBtn" class="secondary-btn">Share on LinkedIn</button>
           <button type="button" id="twitterShareBtn" class="secondary-btn">Share on X</button>
         </div>
+      </div>
+
+      <div id="emailPanel" class="email-panel" hidden>
+        <h3>Email me my report</h3>
+        <p class="section-note">Get a copy in your inbox (premium reports only).</p>
+        <div class="email-row">
+          <input id="emailInput" type="email" placeholder="you@example.com" />
+          <button type="button" id="emailReportBtn" class="secondary-btn">Send Report</button>
+        </div>
+        <p id="emailStatus" class="fine-print"></p>
       </div>
 
       <h3>Parsed Text</h3>
@@ -95,7 +131,12 @@
 
   <footer class="footer">
     <p>© 2026 MoTechCo — Built with love in lilac & purple</p>
-    <p class="footer-links"><a href="landing.html">Home</a> · <a href="https://resume.motechco.ca">Share this tool</a></p>
+    <p class="footer-links">
+      <a href="landing.html">Home</a> ·
+      <a href="privacy.html">Privacy</a> ·
+      <a href="terms.html">Terms</a> ·
+      <a href="https://resume.motechco.ca">Share this tool</a>
+    </p>
   </footer>
 
   <script src="share.js"></script>
