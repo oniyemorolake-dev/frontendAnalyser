@@ -28,7 +28,7 @@ const emailStatus = document.getElementById("emailStatus");
 const premiumBadge = document.getElementById("premiumBadge");
 const scoreBadge = document.getElementById("scoreBadge");
 
-const API_BASE = "https://backendalanalysers.onrender.com";
+const API_BASE = "https://backendaianalysers.onrender.com";
 const SITE_URL = "https://resume.motechco.ca";
 const UNLOCK_STORAGE_KEY = "motechco_unlock_token";
 const REF_CODE_STORAGE_KEY = "motechco_ref_code";
