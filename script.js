@@ -36,8 +36,12 @@ const premiumBadge = document.getElementById("premiumBadge");
 const API_BASE = "https://backendaianalysers.onrender.com";
 const SITE_URL = "https://resume.motechco.ca";
 const UNLOCK_STORAGE_KEY = "motechco_unlock_token";
+const RESUME_STORAGE_KEY = "motechco_resume_text";
+const JOB_STORAGE_KEY = "motechco_job_text";
 const REF_CODE_STORAGE_KEY = "motechco_ref_code";
 const DEVICE_ID_STORAGE_KEY = "motechco_device_id";
+
+const OUTPUT_PLACEHOLDER = "Upload a resume to see extracted text here.";
 
 const ANALYSIS_PLACEHOLDER =
   "Your AI feedback will appear here after you upload a resume.";
@@ -254,7 +258,43 @@ function updateResultsUi(data) {
 }
 
 function isValidResumeText(text) {
-  return text && !text.startsWith("Please choose") && !text.startsWith("Upload failed");
+  if (!text || typeof text !== "string") return false;
+  const trimmed = text.trim();
+  if (trimmed.length < 80) return false;
+  if (trimmed.startsWith("Please choose") || trimmed.startsWith("Upload failed")) return false;
+  if (trimmed === OUTPUT_PLACEHOLDER || trimmed === ANALYSIS_PLACEHOLDER) return false;
+  if (/^upload a resume to see extracted text here\.?$/i.test(trimmed)) return false;
+  return true;
+}
+
+function saveResumeDraft() {
+  const text = output?.textContent?.trim() || "";
+  const job = jobDescriptionInput?.value?.trim() || "";
+  if (isValidResumeText(text)) {
+    sessionStorage.setItem(RESUME_STORAGE_KEY, text);
+  }
+  sessionStorage.setItem(JOB_STORAGE_KEY, job);
+}
+
+function restoreResumeDraft() {
+  const savedResume = sessionStorage.getItem(RESUME_STORAGE_KEY) || "";
+  const savedJob = sessionStorage.getItem(JOB_STORAGE_KEY) || "";
+
+  if (savedResume && output && isValidResumeText(savedResume)) {
+    output.textContent = savedResume;
+  }
+
+  if (savedJob && jobDescriptionInput) {
+    jobDescriptionInput.value = savedJob;
+  }
+
+  return savedResume;
+}
+
+function showPremiumWelcome() {
+  showAnalysisMessage(
+    "Payment successful — premium is unlocked. Upload or restore your resume below, then we will run your full report."
+  );
 }
 
 function downloadTextFile(filename, text) {
@@ -350,8 +390,12 @@ async function verifyPaymentFromUrl() {
       setUnlockToken(data.unlockToken);
       premiumBadge.hidden = false;
       premiumBadge.textContent = "Premium unlocked";
-      if (isValidResumeText(output.textContent.trim())) {
-        await runAnalysis(output.textContent.trim());
+      updatePaywallUi(true);
+      const savedResume = restoreResumeDraft();
+      if (isValidResumeText(savedResume)) {
+        await runAnalysis(savedResume);
+      } else {
+        showPremiumWelcome();
       }
     }
   } catch (_) {
@@ -372,6 +416,13 @@ async function startCheckout() {
     );
     return;
   }
+
+  if (!isValidResumeText(output.textContent.trim())) {
+    showPaymentStatus("Upload and analyze your resume first, then unlock premium.", true);
+    return;
+  }
+
+  saveResumeDraft();
 
   unlockBtn.disabled = true;
   unlockBtn.textContent = "Redirecting to secure checkout...";
@@ -433,7 +484,10 @@ async function runAnalysis(resumeText) {
 
     if (!res.ok) {
       const detail = data.detail ? ` Details: ${data.detail}` : "";
-      showAnalysisMessage(`${data.error || "Analysis failed."}${detail} Try again in a moment.`);
+      const friendly = /not found|not supported|gemini/i.test(String(data.detail || data.error))
+        ? "Our AI service hit a temporary model issue. Wait 30 seconds, then click Run again."
+        : `${data.error || "Analysis failed."}${detail} Try again in a moment.`;
+      showAnalysisMessage(friendly);
       return false;
     }
 
@@ -529,6 +583,7 @@ form.addEventListener("submit", async (e) => {
     resumeText = data.text || data.content || "Upload completed, but no text was extracted.";
     output.textContent = resumeText;
     output.scrollLeft = 0;
+    saveResumeDraft();
   } catch (_) {
     output.textContent = "Upload failed. The backend may be waking up — try again in a moment.";
     showAnalysisMessage(ANALYSIS_PLACEHOLDER);
@@ -613,6 +668,7 @@ if (twitterShareBtn) {
 }
 
 setupReferralLinkField();
+restoreResumeDraft();
 loadPricing();
 loadEmailStatus();
 redeemReferralFromUrl();
