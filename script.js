@@ -5,6 +5,9 @@ const output = document.getElementById("output");
 const analyzeBtn = document.getElementById("analyzeBtn");
 const submitBtn = document.getElementById("submitBtn");
 const analysisOutput = document.getElementById("analysisOutput");
+const scoreHero = document.getElementById("scoreHero");
+const scoreHeroRing = document.getElementById("scoreHeroRing");
+const scoreHeroValue = document.getElementById("scoreHeroValue");
 const jobDescriptionInput = document.getElementById("jobDescription");
 const paywallBox = document.getElementById("paywallBox");
 const unlockBtn = document.getElementById("unlockBtn");
@@ -17,6 +20,7 @@ const matchedKeywords = document.getElementById("matchedKeywords");
 const missingJobKeywords = document.getElementById("missingJobKeywords");
 const referralLink = document.getElementById("referralLink");
 const copyReferralBtn = document.getElementById("copyReferralBtn");
+const referralStatus = document.getElementById("referralStatus");
 const downloadCardBtn = document.getElementById("downloadCardBtn");
 const downloadReportBtn = document.getElementById("downloadReportBtn");
 const printReportBtn = document.getElementById("printReportBtn");
@@ -216,8 +220,25 @@ function updatePaywallUi(isPremium) {
   }
 }
 
+function showScoreHero(score) {
+  if (!scoreHero || !scoreHeroRing || !scoreHeroValue) return;
+
+  if (typeof score !== "number") {
+    scoreHero.hidden = true;
+    return;
+  }
+
+  scoreHero.hidden = false;
+  scoreHeroValue.textContent = String(score);
+  scoreHeroRing.style.setProperty("--score", String(score));
+  scoreHero.classList.remove("score-hero-animate");
+  void scoreHero.offsetWidth;
+  scoreHero.classList.add("score-hero-animate");
+}
+
 function updateResultsUi(data) {
   latestAnalysis = data;
+  showScoreHero(data.score);
   analysisOutput.textContent = renderAnalysis(data);
   analyzeBtn.style.display = "inline-block";
   renderJobMatchPanel(data);
@@ -389,6 +410,7 @@ async function runAnalysis(resumeText) {
 
   setLoading(true, "Reviewing your resume...", COLD_START_NOTE);
   showAnalysisMessage("Generating structured feedback...");
+  if (scoreHero) scoreHero.hidden = true;
   paywallBox.hidden = true;
   sharePanel.hidden = true;
   emailPanel.hidden = true;
@@ -478,6 +500,7 @@ form.addEventListener("submit", async (e) => {
   setLoading(true, "Extracting text from your file...", COLD_START_NOTE);
   output.textContent = "";
   showAnalysisMessage("Preparing your review...");
+  if (scoreHero) scoreHero.hidden = true;
   analyzeBtn.style.display = "none";
   paywallBox.hidden = true;
   sharePanel.hidden = true;
@@ -528,6 +551,9 @@ if (copyReferralBtn) {
     try {
       await navigator.clipboard.writeText(getReferralShareUrl());
       copyReferralBtn.textContent = "Copied!";
+      if (referralStatus) {
+        referralStatus.textContent = "Link copied. Send it to a friend — when they open it, they get 24 hours of premium free.";
+      }
       setTimeout(() => {
         copyReferralBtn.textContent = "Copy link";
       }, 1800);

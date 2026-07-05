@@ -55,6 +55,13 @@
           <p class="section-note">Score, strengths, weaknesses, and suggestions from Gemini.</p>
         </div>
       </div>
+      <div id="scoreHero" class="score-hero" hidden aria-live="polite">
+        <div class="score-hero-ring" id="scoreHeroRing"><span id="scoreHeroValue">--</span></div>
+        <div>
+          <p class="score-hero-label">Resume score</p>
+          <p class="score-hero-note">Out of 100 — based on your uploaded text</p>
+        </div>
+      </div>
       <pre id="analysisOutput">Your AI feedback will appear here after you upload a resume.</pre>
 
       <div id="paywallBox" class="paywall-inline" hidden>
@@ -106,11 +113,17 @@
 
     <section class="panel referral-panel">
       <h3>Share MoTechCo with a friend</h3>
-      <p class="section-note">They get one premium report free for 24 hours.</p>
+      <p class="section-note">Give a friend one free premium report for 24 hours.</p>
+      <ol class="referral-steps">
+        <li>Click <strong>Copy link</strong> below.</li>
+        <li>Send it by text, WhatsApp, or email.</li>
+        <li>When they open your link, premium unlocks automatically on their device.</li>
+      </ol>
       <div class="referral-row">
-        <input id="referralLink" type="text" readonly />
+        <input id="referralLink" type="text" readonly aria-label="Your referral link" />
         <button type="button" id="copyReferralBtn" class="btn-secondary">Copy link</button>
       </div>
+      <p id="referralStatus" class="fine-print"></p>
     </section>
   </main>
 
