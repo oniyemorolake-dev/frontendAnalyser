@@ -24,9 +24,10 @@
     <p class="intro-copy">Upload a PDF or Word resume. We extract the text, analyze it with Gemini, and show structured feedback.</p>
 
     <section class="panel">
-      <label class="field-label" for="jobDescription">Job posting <span class="label-soft">(paste for match + tailored rewrite)</span></label>
-      <textarea id="jobDescription" rows="4" placeholder="Paste the full job description here (not just the job title). Premium rewrite needs the full posting."></textarea>
-      <p id="jobDescHint" class="fine-print">Tip: paste the whole job ad — at least 2–3 sentences — for keyword match and tailored rewrite.</p>
+      <label class="field-label" for="jobDescription">Job posting — paste here</label>
+      <p class="paste-help">Click inside the box below, then press <strong>Ctrl+V</strong> (or long-press → Paste on phone). Paste the full job ad, not just the job title.</p>
+      <textarea id="jobDescription" class="paste-field" rows="6" placeholder="Example: We are hiring an AI Data Annotator. Responsibilities include... Required skills: attention to detail, English literacy..."></textarea>
+      <p id="jobDescHint" class="fine-print">Characters: <span id="jobCharCount">0</span> (need at least 40 for tailored rewrite)</p>
 
       <form id="uploadForm" enctype="multipart/form-data">
         <label class="field-label" for="resume">Resume file</label>
@@ -45,8 +46,8 @@
 
     <section class="panel">
       <h2>Parsed Text</h2>
-      <p class="section-note">Extracted from your uploaded file.</p>
-      <pre id="output">Upload a resume to see extracted text here.</pre>
+      <p class="section-note">Read-only — extracted from your uploaded file. To paste a job ad, use the <strong>Job posting</strong> box at the top.</p>
+      <pre id="output" class="selectable-pre">Upload a resume to see extracted text here.</pre>
     </section>
 
     <section class="panel">
@@ -63,7 +64,17 @@
           <p class="score-hero-note">Out of 100 — based on your uploaded text</p>
         </div>
       </div>
-      <pre id="analysisOutput">Your AI feedback will appear here after you upload a resume.</pre>
+      <pre id="analysisOutput" class="selectable-pre">Your AI feedback will appear here after you upload a resume.</pre>
+
+      <div id="quotaHelp" class="quota-help" hidden>
+        <h4>Google AI limit reached — what to do</h4>
+        <ol>
+          <li>Wait <strong>2–3 minutes</strong> without clicking anything.</li>
+          <li>Click <strong>Run again</strong> once.</li>
+          <li>If it keeps failing: on Render, replace <strong>GEMINI_API_KEY</strong> with a new key from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a> (create in a new project).</li>
+          <li>For production: enable billing on Google AI Studio for higher limits.</li>
+        </ol>
+      </div>
 
       <div id="paywallBox" class="paywall-inline" hidden>
         <p class="paywall-title">Unlock the full premium report</p>

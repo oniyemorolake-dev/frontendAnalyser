@@ -612,6 +612,46 @@ pre {
   padding: 24px 20px 48px;
 }
 
+.paste-help {
+  margin: 0 0 10px;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.paste-field {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.selectable-pre,
+textarea,
+.paste-field {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.quota-help {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #fff8ef;
+  border: 1px solid #efd9bf;
+}
+
+.quota-help h4 {
+  margin: 0 0 10px;
+}
+
+.quota-help ol {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--ink-soft);
+}
+
+.quota-help li {
+  margin-bottom: 8px;
+}
+
 .intro-copy {
   margin: 0 0 18px;
   color: var(--ink-soft);

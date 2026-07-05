@@ -9,6 +9,8 @@ const scoreHero = document.getElementById("scoreHero");
 const scoreHeroRing = document.getElementById("scoreHeroRing");
 const scoreHeroValue = document.getElementById("scoreHeroValue");
 const jobDescriptionInput = document.getElementById("jobDescription");
+const jobCharCount = document.getElementById("jobCharCount");
+const quotaHelp = document.getElementById("quotaHelp");
 const paywallBox = document.getElementById("paywallBox");
 const unlockBtn = document.getElementById("unlockBtn");
 const paymentStatus = document.getElementById("paymentStatus");
@@ -133,8 +135,22 @@ function renderAnalysis(data, forExport = false) {
   return lines.join("\n").trim();
 }
 
+function updateJobCharCount() {
+  if (!jobCharCount || !jobDescriptionInput) return;
+  jobCharCount.textContent = String(jobDescriptionInput.value.trim().length);
+}
+
+function showQuotaHelp(visible) {
+  if (quotaHelp) quotaHelp.hidden = !visible;
+}
+
+function isQuotaMessage(message) {
+  return /quota|free tier|temporarily busy|rate limit/i.test(String(message || ""));
+}
+
 function showAnalysisMessage(message) {
   analysisOutput.textContent = message;
+  showQuotaHelp(isQuotaMessage(message));
 }
 
 function getDeviceId() {
@@ -892,6 +908,13 @@ if (twitterShareBtn) {
 }
 
 setupReferralLinkField();
+if (jobDescriptionInput) {
+  jobDescriptionInput.addEventListener("input", updateJobCharCount);
+  jobDescriptionInput.addEventListener("paste", () => {
+    setTimeout(updateJobCharCount, 0);
+  });
+  updateJobCharCount();
+}
 restoreResumeDraft();
 loadPricing();
 loadEmailStatus();
