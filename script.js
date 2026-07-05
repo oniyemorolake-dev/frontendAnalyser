@@ -466,40 +466,59 @@ async function generateRewrite() {
   }
 
   if (jobText.length < 40) {
-    rewriteStatus.textContent = "Paste the target job description above first.";
+    rewriteStatus.textContent = `Paste the full job posting above (not just the title). You have ${jobText.length} characters — need at least 40.`;
+    rewriteStatus.className = "fine-print payment-status error";
     return;
   }
 
   rewriteBtn.disabled = true;
-  rewriteStatus.textContent = "Generating a job-tailored resume...";
+  rewriteStatus.className = "fine-print";
+  rewriteStatus.textContent = "Generating a job-tailored resume... this can take up to 90 seconds.";
   rewriteOutput.textContent = "Working...";
 
   try {
-    const res = await fetch(`${API_BASE}/api/resume/rewrite-resume`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        text: resumeText,
-        jobDescription: jobText,
-        unlockToken: getUnlockToken(),
-      }),
-    });
+    const res = await fetchWithTimeout(
+      `${API_BASE}/api/resume/rewrite-resume`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: resumeText,
+          jobDescription: jobText,
+          unlockToken: getUnlockToken(),
+        }),
+      },
+      120000
+    );
     const data = await res.json();
 
     if (!res.ok) {
-      rewriteStatus.textContent = data.detail || data.error || "Could not generate rewrite.";
-      rewriteOutput.textContent = "Your tailored resume will appear here.";
+      rewriteStatus.className = "fine-print payment-status error";
+      if (res.status === 402) {
+        rewriteStatus.textContent =
+          "Premium could not be verified on the server. Refresh the page, or pay once more if needed.";
+        setUnlockToken("");
+        updateRewriteUi(false);
+      } else {
+        rewriteStatus.textContent = data.detail || data.error || "Could not generate rewrite.";
+      }
+      rewriteOutput.textContent = "Your tailored resume will appear here after you generate it.";
       return;
     }
 
     latestRewrite = data.rewrittenResume || "";
     rewriteOutput.textContent = latestRewrite;
+    rewriteStatus.className = "fine-print";
     rewriteStatus.textContent = data.disclaimer || "Review before applying.";
     if (copyRewriteBtn) copyRewriteBtn.style.display = "inline-block";
     if (downloadRewriteBtn) downloadRewriteBtn.style.display = "inline-block";
-  } catch (_) {
-    rewriteStatus.textContent = "Could not generate rewrite right now. Try again in a moment.";
-    rewriteOutput.textContent = "Your tailored resume will appear here.";
+  } catch (err) {
+    rewriteStatus.className = "fine-print payment-status error";
+    rewriteStatus.textContent =
+      err?.name === "AbortError"
+        ? "Rewrite timed out — likely AI quota or server wake-up. Wait 1 minute, then try again."
+        : "Could not generate rewrite right now. Wait 1 minute, then try again.";
+    rewriteOutput.textContent = "Your tailored resume will appear here after you generate it.";
   } finally {
     rewriteBtn.disabled = false;
   }
