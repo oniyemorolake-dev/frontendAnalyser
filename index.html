@@ -66,7 +66,7 @@
 
       <div id="paywallBox" class="paywall-inline" hidden>
         <p class="paywall-title">Unlock the full premium report</p>
-        <p class="section-note">Includes weaknesses, ATS keyword gaps, formatting fixes, and job-match detail.</p>
+        <p class="section-note">Includes weaknesses, ATS keyword gaps, formatting fixes, job-match detail, and a job-tailored resume rewrite.</p>
         <p class="price-tag compact">$4.99 <span>one-time</span></p>
         <button type="button" id="unlockBtn" class="btn-primary">Unlock full report — $4.99</button>
         <p id="paymentStatus" class="payment-status" hidden></p>
@@ -89,6 +89,17 @@
       </div>
     </section>
 
+    <section id="rewritePanel" class="panel" hidden>
+      <h3>Job-tailored resume rewrite</h3>
+      <p class="section-note">Premium: paste a job posting above, then generate a rewritten resume aligned to that role using only your real experience.</p>
+      <div class="actions">
+        <button type="button" id="rewriteBtn" class="btn-primary">Generate tailored resume</button>
+        <button type="button" id="downloadRewriteBtn" class="btn-secondary" style="display: none;">Download rewritten resume</button>
+      </div>
+      <p id="rewriteStatus" class="fine-print"></p>
+      <pre id="rewriteOutput">Your tailored resume will appear here.</pre>
+    </section>
+
     <section id="sharePanel" class="panel" hidden>
       <h3>Export &amp; share</h3>
       <div class="share-actions">
@@ -109,6 +120,12 @@
         <button type="button" id="emailReportBtn" class="btn-primary">Send to my inbox</button>
       </div>
       <p id="emailStatus" class="fine-print"></p>
+    </section>
+
+    <section id="contactPanel" class="panel contact-panel">
+      <h3>Need help?</h3>
+      <p id="contactHelpText" class="section-note">Questions about your report, premium access, or a custom review?</p>
+      <p><a id="contactEmailLink" href="mailto:hello@motechco.ca">hello@motechco.ca</a></p>
     </section>
 
     <section class="panel referral-panel">

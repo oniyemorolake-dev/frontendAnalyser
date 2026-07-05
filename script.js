@@ -12,6 +12,13 @@ const jobDescriptionInput = document.getElementById("jobDescription");
 const paywallBox = document.getElementById("paywallBox");
 const unlockBtn = document.getElementById("unlockBtn");
 const paymentStatus = document.getElementById("paymentStatus");
+const rewritePanel = document.getElementById("rewritePanel");
+const rewriteBtn = document.getElementById("rewriteBtn");
+const rewriteOutput = document.getElementById("rewriteOutput");
+const rewriteStatus = document.getElementById("rewriteStatus");
+const downloadRewriteBtn = document.getElementById("downloadRewriteBtn");
+const contactHelpText = document.getElementById("contactHelpText");
+const contactEmailLink = document.getElementById("contactEmailLink");
 const sharePanel = document.getElementById("sharePanel");
 const emailPanel = document.getElementById("emailPanel");
 const jobMatchPanel = document.getElementById("jobMatchPanel");
@@ -36,6 +43,7 @@ const premiumBadge = document.getElementById("premiumBadge");
 const API_BASE = "https://backendaianalysers.onrender.com";
 const SITE_URL = "https://resume.motechco.ca";
 const UNLOCK_STORAGE_KEY = "motechco_unlock_token";
+const PAID_SESSION_KEY = "motechco_paid_session";
 const RESUME_STORAGE_KEY = "motechco_resume_text";
 const JOB_STORAGE_KEY = "motechco_job_text";
 const REF_CODE_STORAGE_KEY = "motechco_ref_code";
@@ -50,6 +58,7 @@ const COLD_START_NOTE =
   "First request after idle may take up to 60 seconds on the free tier.";
 
 let latestAnalysis = null;
+let latestRewrite = "";
 let pricing = { priceLabel: "$4.99", stripeConfigured: false };
 let emailDeliveryEnabled = false;
 
@@ -138,12 +147,31 @@ function setupReferralLinkField() {
 }
 
 function getUnlockToken() {
-  return sessionStorage.getItem(UNLOCK_STORAGE_KEY) || "";
+  return (
+    sessionStorage.getItem(UNLOCK_STORAGE_KEY) ||
+    localStorage.getItem(PAID_SESSION_KEY) ||
+    ""
+  );
 }
 
 function setUnlockToken(token) {
-  if (token) sessionStorage.setItem(UNLOCK_STORAGE_KEY, token);
-  else sessionStorage.removeItem(UNLOCK_STORAGE_KEY);
+  if (token) {
+    sessionStorage.setItem(UNLOCK_STORAGE_KEY, token);
+    localStorage.setItem(PAID_SESSION_KEY, token);
+  } else {
+    sessionStorage.removeItem(UNLOCK_STORAGE_KEY);
+    localStorage.removeItem(PAID_SESSION_KEY);
+  }
+}
+
+function applyPremiumUi(sourceLabel) {
+  premiumBadge.hidden = false;
+  premiumBadge.textContent =
+    sourceLabel === "referral" ? "Referral access active" : "Premium active";
+  updatePaywallUi(true);
+  if (rewritePanel) rewritePanel.hidden = false;
+  if (sharePanel) sharePanel.hidden = false;
+  if (emailPanel) emailPanel.hidden = false;
 }
 
 function setLoading(active, message, note) {
@@ -254,6 +282,7 @@ function updateResultsUi(data) {
     : "Premium active";
   sharePanel.hidden = !isPremium;
   emailPanel.hidden = !isPremium;
+  if (rewritePanel) rewritePanel.hidden = !isPremium;
   updatePaywallUi(isPremium);
 }
 
@@ -271,14 +300,22 @@ function saveResumeDraft() {
   const text = output?.textContent?.trim() || "";
   const job = jobDescriptionInput?.value?.trim() || "";
   if (isValidResumeText(text)) {
+    localStorage.setItem(RESUME_STORAGE_KEY, text);
     sessionStorage.setItem(RESUME_STORAGE_KEY, text);
   }
+  localStorage.setItem(JOB_STORAGE_KEY, job);
   sessionStorage.setItem(JOB_STORAGE_KEY, job);
 }
 
 function restoreResumeDraft() {
-  const savedResume = sessionStorage.getItem(RESUME_STORAGE_KEY) || "";
-  const savedJob = sessionStorage.getItem(JOB_STORAGE_KEY) || "";
+  const savedResume =
+    localStorage.getItem(RESUME_STORAGE_KEY) ||
+    sessionStorage.getItem(RESUME_STORAGE_KEY) ||
+    "";
+  const savedJob =
+    localStorage.getItem(JOB_STORAGE_KEY) ||
+    sessionStorage.getItem(JOB_STORAGE_KEY) ||
+    "";
 
   if (savedResume && output && isValidResumeText(savedResume)) {
     output.textContent = savedResume;
@@ -333,6 +370,105 @@ async function loadEmailStatus() {
   }
 }
 
+async function loadContactInfo() {
+  try {
+    const res = await fetch(`${API_BASE}/api/resume/contact`);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (contactEmailLink && data.email) {
+      contactEmailLink.href = `mailto:${data.email}?subject=MoTechCo%20Resume%20Analyzer%20help`;
+      contactEmailLink.textContent = data.email;
+    }
+    if (contactHelpText && data.message) {
+      contactHelpText.textContent = data.message;
+    }
+  } catch (_) {
+    /* ignore */
+  }
+}
+
+async function restorePremiumAccess() {
+  const token = getUnlockToken();
+  if (!token) return;
+
+  if (token.startsWith("referral_")) {
+    applyPremiumUi("referral");
+    return;
+  }
+
+  if (!token.startsWith("cs_")) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/resume/premium-status`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ unlockToken: token }),
+    });
+    const data = await res.json();
+    if (res.ok && data.premium) {
+      if (data.unlockToken) setUnlockToken(data.unlockToken);
+      applyPremiumUi("stripe");
+    } else {
+      setUnlockToken("");
+    }
+  } catch (_) {
+    /* ignore */
+  }
+}
+
+async function generateRewrite() {
+  const resumeText = output?.textContent?.trim() || "";
+  const jobText = jobDescriptionInput?.value?.trim() || "";
+
+  if (!getUnlockToken()) {
+    rewriteStatus.textContent = "Unlock premium to generate a tailored resume.";
+    return;
+  }
+
+  if (!isValidResumeText(resumeText)) {
+    rewriteStatus.textContent = "Upload your resume first.";
+    return;
+  }
+
+  if (jobText.length < 40) {
+    rewriteStatus.textContent = "Paste the target job description above first.";
+    return;
+  }
+
+  rewriteBtn.disabled = true;
+  rewriteStatus.textContent = "Generating a job-tailored resume...";
+  rewriteOutput.textContent = "Working...";
+
+  try {
+    const res = await fetch(`${API_BASE}/api/resume/rewrite-resume`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: resumeText,
+        jobDescription: jobText,
+        unlockToken: getUnlockToken(),
+      }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      rewriteStatus.textContent = data.detail || data.error || "Could not generate rewrite.";
+      rewriteOutput.textContent = "Your tailored resume will appear here.";
+      return;
+    }
+
+    latestRewrite = data.rewrittenResume || "";
+    rewriteOutput.textContent = latestRewrite;
+    rewriteStatus.textContent = data.disclaimer || "Review before applying.";
+    if (downloadRewriteBtn) downloadRewriteBtn.style.display = "inline-block";
+  } catch (_) {
+    rewriteStatus.textContent = "Could not generate rewrite right now. Try again in a moment.";
+    rewriteOutput.textContent = "Your tailored resume will appear here.";
+  } finally {
+    rewriteBtn.disabled = false;
+  }
+}
+
 async function loadPricing() {
   try {
     const res = await fetch(`${API_BASE}/api/resume/pricing`);
@@ -359,10 +495,10 @@ async function redeemReferralFromUrl() {
 
     if (res.ok && data.unlockToken) {
       setUnlockToken(data.unlockToken);
-      premiumBadge.hidden = false;
-      premiumBadge.textContent = "Referral premium unlocked";
-      if (isValidResumeText(output.textContent.trim())) {
-        await runAnalysis(output.textContent.trim());
+      applyPremiumUi("referral");
+      const savedResume = restoreResumeDraft();
+      if (isValidResumeText(savedResume)) {
+        await runAnalysis(savedResume);
       }
     }
   } catch (_) {
@@ -388,9 +524,7 @@ async function verifyPaymentFromUrl() {
     const data = await res.json();
     if (res.ok && data.unlockToken) {
       setUnlockToken(data.unlockToken);
-      premiumBadge.hidden = false;
-      premiumBadge.textContent = "Premium unlocked";
-      updatePaywallUi(true);
+      applyPremiumUi("stripe");
       const savedResume = restoreResumeDraft();
       if (isValidResumeText(savedResume)) {
         await runAnalysis(savedResume);
@@ -465,6 +599,7 @@ async function runAnalysis(resumeText) {
   paywallBox.hidden = true;
   sharePanel.hidden = true;
   emailPanel.hidden = true;
+  if (rewritePanel) rewritePanel.hidden = true;
   jobMatchPanel.hidden = true;
 
   const payload = {
@@ -559,6 +694,7 @@ form.addEventListener("submit", async (e) => {
   paywallBox.hidden = true;
   sharePanel.hidden = true;
   emailPanel.hidden = true;
+  if (rewritePanel) rewritePanel.hidden = true;
   jobMatchPanel.hidden = true;
 
   const formData = new FormData();
@@ -598,6 +734,15 @@ form.addEventListener("submit", async (e) => {
 analyzeBtn.addEventListener("click", async () => {
   await runAnalysis(output.textContent.trim());
 });
+
+if (rewriteBtn) rewriteBtn.addEventListener("click", generateRewrite);
+
+if (downloadRewriteBtn) {
+  downloadRewriteBtn.addEventListener("click", () => {
+    if (!latestRewrite) return;
+    downloadTextFile("motechco-tailored-resume.txt", latestRewrite);
+  });
+}
 
 if (unlockBtn) unlockBtn.addEventListener("click", startCheckout);
 
@@ -671,5 +816,7 @@ setupReferralLinkField();
 restoreResumeDraft();
 loadPricing();
 loadEmailStatus();
+loadContactInfo();
+restorePremiumAccess();
 redeemReferralFromUrl();
 verifyPaymentFromUrl();

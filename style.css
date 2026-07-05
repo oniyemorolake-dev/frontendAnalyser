@@ -736,3 +736,13 @@ pre {
   60% { transform: scale(1.05); }
   100% { transform: scale(1); opacity: 1; }
 }
+
+.contact-panel a {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+#rewriteOutput {
+  margin-top: 14px;
+  min-height: 120px;
+}
