@@ -565,3 +565,104 @@ pre {
     padding: 22px 18px;
   }
 }
+
+.classic-layout {
+  background: #f5f0fa;
+}
+
+.classic-layout body,
+.classic-layout {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+.classic-layout h1,
+.classic-layout h2,
+.classic-layout h3,
+.classic-layout h4 {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+.simple-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 18px 24px;
+  background: #5b2d82;
+  color: white;
+}
+
+.simple-header .brand {
+  color: white;
+  text-decoration: none;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.simple-header .header-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.classic-main {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+.intro-copy {
+  margin: 0 0 18px;
+  color: var(--ink-soft);
+}
+
+.panel-head-row {
+  margin-bottom: 12px;
+}
+
+.paywall-inline {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 14px;
+  background: #efe6f7;
+  border: 1px solid #d8c7e5;
+}
+
+.paywall-title {
+  margin: 0 0 8px;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.price-tag.compact {
+  font-size: 28px;
+  margin: 12px 0;
+}
+
+.payment-status {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #e8f5ee;
+  color: #1f6b43;
+  font-size: 14px;
+}
+
+.payment-status.error {
+  background: #fceeee;
+  color: #8b3a3a;
+}
+
+.classic-layout pre {
+  background: #faf7fc;
+  border: 1px solid #e6dfd6;
+}
+
+.classic-layout .panel {
+  box-shadow: none;
+}
+
+.classic-layout .site-footer {
+  margin-top: 0;
+}

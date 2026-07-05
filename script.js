@@ -4,11 +4,11 @@ const loadingNote = document.getElementById("loadingNote");
 const output = document.getElementById("output");
 const analyzeBtn = document.getElementById("analyzeBtn");
 const submitBtn = document.getElementById("submitBtn");
-const analysisResults = document.getElementById("analysisResults");
-const resultsSection = document.getElementById("resultsSection");
+const analysisOutput = document.getElementById("analysisOutput");
 const jobDescriptionInput = document.getElementById("jobDescription");
 const paywallBox = document.getElementById("paywallBox");
 const unlockBtn = document.getElementById("unlockBtn");
+const paymentStatus = document.getElementById("paymentStatus");
 const sharePanel = document.getElementById("sharePanel");
 const emailPanel = document.getElementById("emailPanel");
 const jobMatchPanel = document.getElementById("jobMatchPanel");
@@ -28,7 +28,6 @@ const emailReportBtn = document.getElementById("emailReportBtn");
 const emailStatus = document.getElementById("emailStatus");
 const emailHelpText = document.getElementById("emailHelpText");
 const premiumBadge = document.getElementById("premiumBadge");
-const scoreBadge = document.getElementById("scoreBadge");
 
 const API_BASE = "https://backendaianalysers.onrender.com";
 const SITE_URL = "https://resume.motechco.ca";
@@ -37,7 +36,7 @@ const REF_CODE_STORAGE_KEY = "motechco_ref_code";
 const DEVICE_ID_STORAGE_KEY = "motechco_device_id";
 
 const ANALYSIS_PLACEHOLDER =
-  "Upload your resume to see a score, strengths, and practical next steps.";
+  "Your AI feedback will appear here after you upload a resume.";
 
 const COLD_START_NOTE =
   "First request after idle may take up to 60 seconds on the free tier.";
@@ -54,57 +53,54 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
-function renderListItems(items) {
-  if (!Array.isArray(items) || items.length === 0) {
-    return "<p class='section-note'>Nothing listed yet.</p>";
-  }
-  return `<ul class="result-list">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+function renderSections(title, items) {
+  if (!Array.isArray(items) || items.length === 0) return [];
+  return [`${title}:`, ...items.map((item) => `  • ${item}`), ""];
 }
 
-function renderAnalysisCards(data) {
+function renderAnalysis(data, forExport = false) {
   if (data.raw) {
-    return `<div class="result-block"><h4>Parse issue</h4><p>${escapeHtml(data.raw)}</p></div>`;
+    return `Could not parse structured feedback.\n\nRaw model output:\n${data.raw}`;
   }
 
-  const score = typeof data.score === "number" ? data.score : null;
-  const strengths = data.strengths || data.strengthsPreview || [];
-  const isPremium = data.tier === "premium" || data.locked === false;
+  const lines = [`MoTechCo Resume Analyzer Report`, ""];
 
-  let html = "";
-
-  if (score !== null) {
-    html += `
-      <div class="score-card">
-        <div class="score-ring" style="--score:${score}"><span>${score}</span></div>
-        <div>
-          <h3>Overall resume score</h3>
-          <p class="section-note">Based on clarity, evidence, keywords, and structure in your uploaded text.</p>
-        </div>
-      </div>`;
+  if (typeof data.score === "number") {
+    lines.push(`Overall Score: ${data.score}/100`, "");
   }
 
-  html += `<div class="result-block"><h4>Strengths</h4>${renderListItems(strengths)}</div>`;
-
-  if (!isPremium) {
-    html += `
-      <div class="locked-banner">
-        <h4>Premium sections locked</h4>
-        <p>${escapeHtml(data.upgradeMessage || `Unlock the full report for ${pricing.priceLabel}.`)}</p>
-        <p class="section-note">Includes weaknesses, ATS keyword gaps, formatting fixes, and job-match detail.</p>
-      </div>`;
-    return html;
+  if (typeof data.jobMatchScore === "number") {
+    lines.push(`Job Match Score: ${data.jobMatchScore}/100`, "");
+    if (data.jobFitSummary) {
+      lines.push("Job Fit Summary:", `  ${data.jobFitSummary}`, "");
+    }
   }
 
-  html += `<div class="result-block"><h4>Weaknesses</h4>${renderListItems(data.weaknesses)}</div>`;
-  html += `<div class="result-block"><h4>Missing keywords</h4>${renderListItems(data.missingKeywords)}</div>`;
-  html += `<div class="result-block"><h4>Formatting suggestions</h4>${renderListItems(data.formattingSuggestions)}</div>`;
+  lines.push(...renderSections("Strengths", data.strengths || data.strengthsPreview));
 
-  return html;
+  if (data.tier === "free" && data.locked && !forExport) {
+    lines.push("Premium Preview Locked:", "  • Full weaknesses breakdown");
+    lines.push("  • Complete ATS keyword list");
+    lines.push("  • Formatting suggestions");
+    lines.push("  • Job description match details", "");
+    lines.push(data.upgradeMessage || `Unlock the full report for ${pricing.priceLabel}.`);
+    lines.push("", "Click the unlock button below to pay securely with Stripe.");
+    return lines.join("\n").trim();
+  }
+
+  lines.push(...renderSections("Weaknesses", data.weaknesses));
+  lines.push(...renderSections("Missing Keywords", data.missingKeywords));
+  lines.push(...renderSections("Job Matched Keywords", data.jobMatchedKeywords));
+  lines.push(...renderSections("Job Missing Keywords", data.jobMissingKeywords));
+  lines.push(...renderSections("Formatting Suggestions", data.formattingSuggestions));
+  lines.push("", SITE_URL);
+
+  if (lines.length <= 3) return JSON.stringify(data, null, 2);
+  return lines.join("\n").trim();
 }
 
-function showResultsMessage(message) {
-  resultsSection.hidden = false;
-  analysisResults.innerHTML = `<div class="result-block"><p>${escapeHtml(message)}</p></div>`;
+function showAnalysisMessage(message) {
+  analysisOutput.textContent = message;
 }
 
 function getDeviceId() {
@@ -189,82 +185,51 @@ function renderJobMatchPanel(data) {
   renderKeywordChips(missingJobKeywords, data.jobMissingKeywords, "missing");
 }
 
-function renderSections(title, items) {
-  if (!Array.isArray(items) || items.length === 0) return [];
-  return [`${title}:`, ...items.map((item) => `  • ${item}`), ""];
-}
-
 function buildReportText(data) {
   return renderAnalysis(data, true);
 }
 
-function renderAnalysis(data, forExport = false) {
-  if (data.raw) {
-    return `Could not parse structured feedback.\n\nRaw model output:\n${data.raw}`;
+function showPaymentStatus(message, isError = false) {
+  if (!paymentStatus) return;
+  paymentStatus.hidden = !message;
+  paymentStatus.textContent = message;
+  paymentStatus.className = isError ? "payment-status error" : "payment-status";
+}
+
+function updatePaywallUi(isPremium) {
+  paywallBox.hidden = isPremium;
+
+  if (unlockBtn) {
+    unlockBtn.textContent = isPremium
+      ? "Premium unlocked"
+      : `Unlock full report — ${pricing.priceLabel}`;
+    unlockBtn.disabled = isPremium;
   }
 
-  const lines = [`MoTechCo Resume Analyzer Report`, ""];
-
-  if (typeof data.score === "number") {
-    lines.push(`Overall Score: ${data.score}/100`, "");
+  if (!isPremium && !pricing.stripeConfigured) {
+    showPaymentStatus(
+      "Checkout is not live yet. Add STRIPE_SECRET_KEY and STRIPE_PRICE_ID on Render, then redeploy the backend.",
+      true
+    );
+  } else {
+    showPaymentStatus("");
   }
-
-  if (typeof data.jobMatchScore === "number") {
-    lines.push(`Job Match Score: ${data.jobMatchScore}/100`, "");
-    if (data.jobFitSummary) {
-      lines.push("Job Fit Summary:", `  ${data.jobFitSummary}`, "");
-    }
-  }
-
-  lines.push(...renderSections("Strengths", data.strengths || data.strengthsPreview));
-
-  if (data.tier === "free" && data.locked && !forExport) {
-    lines.push("Premium Preview Locked:", "  • Full weaknesses breakdown");
-    lines.push("  • Complete ATS keyword list");
-    lines.push("  • Formatting suggestions");
-    lines.push("  • Job description match details", "");
-    lines.push(data.upgradeMessage || `Unlock the full report for ${pricing.priceLabel}.`);
-    return lines.join("\n").trim();
-  }
-
-  lines.push(...renderSections("Weaknesses", data.weaknesses));
-  lines.push(...renderSections("Missing Keywords", data.missingKeywords));
-  lines.push(...renderSections("Job Matched Keywords", data.jobMatchedKeywords));
-  lines.push(...renderSections("Job Missing Keywords", data.jobMissingKeywords));
-  lines.push(...renderSections("Formatting Suggestions", data.formattingSuggestions));
-  lines.push("", SITE_URL);
-
-  if (lines.length <= 3) return JSON.stringify(data, null, 2);
-  return lines.join("\n").trim();
 }
 
 function updateResultsUi(data) {
   latestAnalysis = data;
-  resultsSection.hidden = false;
-  analysisResults.innerHTML = renderAnalysisCards(data);
+  analysisOutput.textContent = renderAnalysis(data);
   analyzeBtn.style.display = "inline-block";
   renderJobMatchPanel(data);
-
-  if (typeof data.score === "number") {
-    scoreBadge.hidden = false;
-    scoreBadge.textContent = `${data.score}/100`;
-  } else {
-    scoreBadge.hidden = true;
-  }
 
   const isPremium = data.tier === "premium" || data.locked === false;
   premiumBadge.hidden = !isPremium;
   premiumBadge.textContent = getUnlockToken().startsWith("referral_")
     ? "Referral access active"
     : "Premium active";
-  paywallBox.hidden = isPremium;
   sharePanel.hidden = !isPremium;
   emailPanel.hidden = !isPremium;
-
-  if (unlockBtn) {
-    unlockBtn.textContent = isPremium ? "Premium unlocked" : `Unlock full report — ${pricing.priceLabel}`;
-    unlockBtn.disabled = isPremium;
-  }
+  updatePaywallUi(isPremium);
 }
 
 function isValidResumeText(text) {
@@ -315,9 +280,7 @@ async function loadPricing() {
     /* keep defaults */
   }
 
-  if (unlockBtn && !unlockBtn.disabled) {
-    unlockBtn.textContent = `Unlock full report — ${pricing.priceLabel}`;
-  }
+  updatePaywallUi(Boolean(getUnlockToken()));
 }
 
 async function redeemReferralFromUrl() {
@@ -337,7 +300,7 @@ async function redeemReferralFromUrl() {
       setUnlockToken(data.unlockToken);
       premiumBadge.hidden = false;
       premiumBadge.textContent = "Referral premium unlocked";
-      if (output.textContent.trim()) {
+      if (isValidResumeText(output.textContent.trim())) {
         await runAnalysis(output.textContent.trim());
       }
     }
@@ -366,7 +329,7 @@ async function verifyPaymentFromUrl() {
       setUnlockToken(data.unlockToken);
       premiumBadge.hidden = false;
       premiumBadge.textContent = "Premium unlocked";
-      if (output.textContent.trim()) {
+      if (isValidResumeText(output.textContent.trim())) {
         await runAnalysis(output.textContent.trim());
       }
     }
@@ -381,8 +344,17 @@ async function verifyPaymentFromUrl() {
 }
 
 async function startCheckout() {
+  if (!pricing.stripeConfigured) {
+    showPaymentStatus(
+      "Payments are not configured on the server yet. Add your Stripe test keys on Render, redeploy, then try again.",
+      true
+    );
+    return;
+  }
+
   unlockBtn.disabled = true;
   unlockBtn.textContent = "Redirecting to secure checkout...";
+  showPaymentStatus("Opening Stripe checkout...");
 
   try {
     const res = await fetch(`${API_BASE}/api/resume/create-checkout`, {
@@ -393,27 +365,30 @@ async function startCheckout() {
     const data = await res.json();
 
     if (!res.ok || !data.url) {
-      alert(data.detail || data.error || "Checkout is not available yet. Add Stripe keys on Render.");
+      showPaymentStatus(
+        data.detail || data.error || "Checkout is not available yet. Add Stripe keys on Render.",
+        true
+      );
       return;
     }
 
     window.location.href = data.url;
   } catch (_) {
-    alert("Could not start checkout. Try again in a moment.");
+    showPaymentStatus("Could not start checkout. Try again in a moment.", true);
   } finally {
     unlockBtn.disabled = false;
-    unlockBtn.textContent = `Unlock Full Report — ${pricing.priceLabel}`;
+    unlockBtn.textContent = `Unlock full report — ${pricing.priceLabel}`;
   }
 }
 
 async function runAnalysis(resumeText) {
   if (!isValidResumeText(resumeText)) {
-    showResultsMessage("Upload a resume first, then we will analyze it automatically.");
+    showAnalysisMessage("Upload a resume first, then we will analyze it automatically.");
     return false;
   }
 
   setLoading(true, "Reviewing your resume...", COLD_START_NOTE);
-  showResultsMessage("Generating structured feedback...");
+  showAnalysisMessage("Generating structured feedback...");
   paywallBox.hidden = true;
   sharePanel.hidden = true;
   emailPanel.hidden = true;
@@ -436,14 +411,14 @@ async function runAnalysis(resumeText) {
 
     if (!res.ok) {
       const detail = data.detail ? ` Details: ${data.detail}` : "";
-      showResultsMessage(`${data.error || "Analysis failed."}${detail} Try again in a moment.`);
+      showAnalysisMessage(`${data.error || "Analysis failed."}${detail} Try again in a moment.`);
       return false;
     }
 
     updateResultsUi(data);
     return true;
   } catch (_) {
-    showResultsMessage('Analysis failed. The backend may be waking up — wait about 60 seconds, then click "Run again".');
+    showAnalysisMessage('Analysis failed. The backend may be waking up — wait about 60 seconds, then click "Run again".');
     return false;
   } finally {
     setLoading(false);
@@ -502,14 +477,12 @@ form.addEventListener("submit", async (e) => {
 
   setLoading(true, "Extracting text from your file...", COLD_START_NOTE);
   output.textContent = "";
-  showResultsMessage("Preparing your review...");
+  showAnalysisMessage("Preparing your review...");
   analyzeBtn.style.display = "none";
-  resultsSection.hidden = true;
   paywallBox.hidden = true;
   sharePanel.hidden = true;
   emailPanel.hidden = true;
   jobMatchPanel.hidden = true;
-  scoreBadge.hidden = true;
 
   const formData = new FormData();
   formData.append("file", fileInput.files[0]);
@@ -526,7 +499,7 @@ form.addEventListener("submit", async (e) => {
 
     if (!res.ok) {
       output.textContent = data.error || `Upload failed (${res.status}).`;
-      showResultsMessage(ANALYSIS_PLACEHOLDER);
+      showAnalysisMessage(ANALYSIS_PLACEHOLDER);
       return;
     }
 
@@ -535,7 +508,7 @@ form.addEventListener("submit", async (e) => {
     output.scrollLeft = 0;
   } catch (_) {
     output.textContent = "Upload failed. The backend may be waking up — try again in a moment.";
-    showResultsMessage(ANALYSIS_PLACEHOLDER);
+    showAnalysisMessage(ANALYSIS_PLACEHOLDER);
     return;
   } finally {
     setLoading(false);
@@ -556,7 +529,7 @@ if (copyReferralBtn) {
       await navigator.clipboard.writeText(getReferralShareUrl());
       copyReferralBtn.textContent = "Copied!";
       setTimeout(() => {
-      copyReferralBtn.textContent = "Copy link";
+        copyReferralBtn.textContent = "Copy link";
       }, 1800);
     } catch (_) {
       referralLink.select();
