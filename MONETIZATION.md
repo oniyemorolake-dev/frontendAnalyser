@@ -20,9 +20,16 @@ Add these environment variables:
 3. **Developers → API keys** → copy **Secret key**
 4. Paste into Render env vars above and redeploy
 
-## Netlify (frontend)
+## Email delivery (optional)
 
-No extra config needed. Deploy from `frontendAnalyser` repo.
+Add on Render to actually send reports to users:
+
+| Variable | Value |
+|----------|--------|
+| `RESEND_API_KEY` | from https://resend.com |
+| `RESEND_FROM` | `MoTechCo <hello@yourdomain.com>` |
+
+Without these, users can still **download** or **print** their report from the site.
 
 ## Free vs Premium
 

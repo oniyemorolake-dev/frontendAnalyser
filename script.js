@@ -4,7 +4,8 @@ const loadingNote = document.getElementById("loadingNote");
 const output = document.getElementById("output");
 const analyzeBtn = document.getElementById("analyzeBtn");
 const submitBtn = document.getElementById("submitBtn");
-const analysisOutput = document.getElementById("analysisOutput");
+const analysisResults = document.getElementById("analysisResults");
+const resultsSection = document.getElementById("resultsSection");
 const jobDescriptionInput = document.getElementById("jobDescription");
 const paywallBox = document.getElementById("paywallBox");
 const unlockBtn = document.getElementById("unlockBtn");
@@ -25,6 +26,7 @@ const twitterShareBtn = document.getElementById("twitterShareBtn");
 const emailInput = document.getElementById("emailInput");
 const emailReportBtn = document.getElementById("emailReportBtn");
 const emailStatus = document.getElementById("emailStatus");
+const emailHelpText = document.getElementById("emailHelpText");
 const premiumBadge = document.getElementById("premiumBadge");
 const scoreBadge = document.getElementById("scoreBadge");
 
@@ -35,15 +37,75 @@ const REF_CODE_STORAGE_KEY = "motechco_ref_code";
 const DEVICE_ID_STORAGE_KEY = "motechco_device_id";
 
 const ANALYSIS_PLACEHOLDER =
-  "Your AI feedback will appear here after you upload a resume. Free users get a score + preview. Unlock the full report or use a referral link for premium.";
+  "Upload your resume to see a score, strengths, and practical next steps.";
 
 const COLD_START_NOTE =
   "First request after idle may take up to 60 seconds on the free tier.";
 
 let latestAnalysis = null;
 let pricing = { priceLabel: "$4.99", stripeConfigured: false };
+let emailDeliveryEnabled = false;
 
-analysisOutput.textContent = ANALYSIS_PLACEHOLDER;
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function renderListItems(items) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return "<p class='section-note'>Nothing listed yet.</p>";
+  }
+  return `<ul class="result-list">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+}
+
+function renderAnalysisCards(data) {
+  if (data.raw) {
+    return `<div class="result-block"><h4>Parse issue</h4><p>${escapeHtml(data.raw)}</p></div>`;
+  }
+
+  const score = typeof data.score === "number" ? data.score : null;
+  const strengths = data.strengths || data.strengthsPreview || [];
+  const isPremium = data.tier === "premium" || data.locked === false;
+
+  let html = "";
+
+  if (score !== null) {
+    html += `
+      <div class="score-card">
+        <div class="score-ring" style="--score:${score}"><span>${score}</span></div>
+        <div>
+          <h3>Overall resume score</h3>
+          <p class="section-note">Based on clarity, evidence, keywords, and structure in your uploaded text.</p>
+        </div>
+      </div>`;
+  }
+
+  html += `<div class="result-block"><h4>Strengths</h4>${renderListItems(strengths)}</div>`;
+
+  if (!isPremium) {
+    html += `
+      <div class="locked-banner">
+        <h4>Premium sections locked</h4>
+        <p>${escapeHtml(data.upgradeMessage || `Unlock the full report for ${pricing.priceLabel}.`)}</p>
+        <p class="section-note">Includes weaknesses, ATS keyword gaps, formatting fixes, and job-match detail.</p>
+      </div>`;
+    return html;
+  }
+
+  html += `<div class="result-block"><h4>Weaknesses</h4>${renderListItems(data.weaknesses)}</div>`;
+  html += `<div class="result-block"><h4>Missing keywords</h4>${renderListItems(data.missingKeywords)}</div>`;
+  html += `<div class="result-block"><h4>Formatting suggestions</h4>${renderListItems(data.formattingSuggestions)}</div>`;
+
+  return html;
+}
+
+function showResultsMessage(message) {
+  resultsSection.hidden = false;
+  analysisResults.innerHTML = `<div class="result-block"><p>${escapeHtml(message)}</p></div>`;
+}
 
 function getDeviceId() {
   let id = localStorage.getItem(DEVICE_ID_STORAGE_KEY);
@@ -178,7 +240,8 @@ function renderAnalysis(data, forExport = false) {
 
 function updateResultsUi(data) {
   latestAnalysis = data;
-  analysisOutput.textContent = renderAnalysis(data);
+  resultsSection.hidden = false;
+  analysisResults.innerHTML = renderAnalysisCards(data);
   analyzeBtn.style.display = "inline-block";
   renderJobMatchPanel(data);
 
@@ -192,14 +255,15 @@ function updateResultsUi(data) {
   const isPremium = data.tier === "premium" || data.locked === false;
   premiumBadge.hidden = !isPremium;
   premiumBadge.textContent = getUnlockToken().startsWith("referral_")
-    ? "Referral premium unlocked"
-    : "Premium unlocked";
+    ? "Referral access active"
+    : "Premium active";
   paywallBox.hidden = isPremium;
   sharePanel.hidden = !isPremium;
   emailPanel.hidden = !isPremium;
 
-  if (!isPremium && unlockBtn) {
-    unlockBtn.textContent = `Unlock Full Report — ${pricing.priceLabel}`;
+  if (unlockBtn) {
+    unlockBtn.textContent = isPremium ? "Premium unlocked" : `Unlock full report — ${pricing.priceLabel}`;
+    unlockBtn.disabled = isPremium;
   }
 }
 
@@ -227,6 +291,22 @@ function printReport() {
   popup.print();
 }
 
+async function loadEmailStatus() {
+  try {
+    const res = await fetch(`${API_BASE}/api/resume/email-status`);
+    if (!res.ok) return;
+    const data = await res.json();
+    emailDeliveryEnabled = Boolean(data.configured);
+    if (emailHelpText) {
+      emailHelpText.textContent = emailDeliveryEnabled
+        ? "We will email your full premium report to the address below."
+        : "Email delivery is not enabled yet. You can still download or print your report below.";
+    }
+  } catch (_) {
+    /* ignore */
+  }
+}
+
 async function loadPricing() {
   try {
     const res = await fetch(`${API_BASE}/api/resume/pricing`);
@@ -235,8 +315,8 @@ async function loadPricing() {
     /* keep defaults */
   }
 
-  if (unlockBtn) {
-    unlockBtn.textContent = `Unlock Full Report — ${pricing.priceLabel}`;
+  if (unlockBtn && !unlockBtn.disabled) {
+    unlockBtn.textContent = `Unlock full report — ${pricing.priceLabel}`;
   }
 }
 
@@ -328,12 +408,12 @@ async function startCheckout() {
 
 async function runAnalysis(resumeText) {
   if (!isValidResumeText(resumeText)) {
-    analysisOutput.textContent = "Upload a resume first, then we'll analyze it automatically.";
+    showResultsMessage("Upload a resume first, then we will analyze it automatically.");
     return false;
   }
 
-  setLoading(true, "Step 2 of 2 — Analyzing your resume with AI...", COLD_START_NOTE);
-  analysisOutput.textContent = "Generating AI feedback...";
+  setLoading(true, "Reviewing your resume...", COLD_START_NOTE);
+  showResultsMessage("Generating structured feedback...");
   paywallBox.hidden = true;
   sharePanel.hidden = true;
   emailPanel.hidden = true;
@@ -355,16 +435,15 @@ async function runAnalysis(resumeText) {
     const data = await res.json();
 
     if (!res.ok) {
-      const detail = data.detail ? `\n\nDetails: ${data.detail}` : "";
-      analysisOutput.textContent = `${data.error || "Analysis failed."}${detail}\n\nClick "Re-analyze" to try again.`;
+      const detail = data.detail ? ` Details: ${data.detail}` : "";
+      showResultsMessage(`${data.error || "Analysis failed."}${detail} Try again in a moment.`);
       return false;
     }
 
     updateResultsUi(data);
     return true;
   } catch (_) {
-    analysisOutput.textContent =
-      'Analysis failed. The backend may be waking up — wait about 60 seconds, then click "Re-analyze".';
+    showResultsMessage('Analysis failed. The backend may be waking up — wait about 60 seconds, then click "Run again".');
     return false;
   } finally {
     setLoading(false);
@@ -401,6 +480,10 @@ async function sendEmailReport() {
     }
 
     emailStatus.textContent = data.message || "Report request received.";
+
+    if (!data.emailed) {
+      downloadTextFile("motechco-resume-report.txt", buildReportText(latestAnalysis));
+    }
   } catch (_) {
     emailStatus.textContent = "Could not send report right now.";
   } finally {
@@ -417,10 +500,11 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  setLoading(true, "Step 1 of 2 — Uploading and extracting text...", COLD_START_NOTE);
+  setLoading(true, "Extracting text from your file...", COLD_START_NOTE);
   output.textContent = "";
-  analysisOutput.textContent = "Waiting for extracted text...";
+  showResultsMessage("Preparing your review...");
   analyzeBtn.style.display = "none";
+  resultsSection.hidden = true;
   paywallBox.hidden = true;
   sharePanel.hidden = true;
   emailPanel.hidden = true;
@@ -442,7 +526,7 @@ form.addEventListener("submit", async (e) => {
 
     if (!res.ok) {
       output.textContent = data.error || `Upload failed (${res.status}).`;
-      analysisOutput.textContent = ANALYSIS_PLACEHOLDER;
+      showResultsMessage(ANALYSIS_PLACEHOLDER);
       return;
     }
 
@@ -451,7 +535,7 @@ form.addEventListener("submit", async (e) => {
     output.scrollLeft = 0;
   } catch (_) {
     output.textContent = "Upload failed. The backend may be waking up — try again in a moment.";
-    analysisOutput.textContent = ANALYSIS_PLACEHOLDER;
+    showResultsMessage(ANALYSIS_PLACEHOLDER);
     return;
   } finally {
     setLoading(false);
@@ -472,7 +556,7 @@ if (copyReferralBtn) {
       await navigator.clipboard.writeText(getReferralShareUrl());
       copyReferralBtn.textContent = "Copied!";
       setTimeout(() => {
-        copyReferralBtn.textContent = "Copy Referral Link";
+      copyReferralBtn.textContent = "Copy link";
       }, 1800);
     } catch (_) {
       referralLink.select();
@@ -505,7 +589,7 @@ if (copyShareBtn) {
       await navigator.clipboard.writeText(text);
       copyShareBtn.textContent = "Copied!";
       setTimeout(() => {
-        copyShareBtn.textContent = "Copy Share Text";
+        copyShareBtn.textContent = "Copy caption";
       }, 1800);
     } catch (_) {
       alert(text);
@@ -531,5 +615,6 @@ if (twitterShareBtn) {
 
 setupReferralLinkField();
 loadPricing();
+loadEmailStatus();
 redeemReferralFromUrl();
 verifyPaymentFromUrl();

@@ -3,139 +3,158 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Free AI Resume Analyzer &amp; ATS Checker | MoTechCo</title>
-  <meta name="description" content="Upload your resume and get a free AI score, ATS keyword feedback, and job description match. Premium full report from MoTechCo." />
-  <meta name="keywords" content="resume analyzer, ATS checker, AI resume review, job match, MoTechCo, resume score" />
-  <meta name="robots" content="index, follow" />
+  <title>Resume Analyzer | MoTechCo</title>
+  <meta name="description" content="Upload your resume for a clear score, ATS keyword feedback, and optional job-match analysis. A MoTechCo product." />
   <link rel="canonical" href="https://resume.motechco.ca/index.html" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="MoTechCo AI Resume Analyzer" />
-  <meta property="og:description" content="Get a free resume score, ATS tips, and job-match analysis in one click." />
+  <meta property="og:title" content="MoTechCo Resume Analyzer" />
+  <meta property="og:description" content="Professional resume feedback in minutes. Free score, premium full report." />
   <meta property="og:url" content="https://resume.motechco.ca/index.html" />
-  <meta property="og:site_name" content="MoTechCo" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="MoTechCo AI Resume Analyzer" />
-  <meta name="twitter:description" content="Free AI resume score + premium ATS and job-match report." />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="analyzer-page">
   <nav class="top-nav">
-    <a class="brand" href="landing.html">MoTechCo</a>
+    <a class="brand" href="landing.html"><span class="brand-mark">M</span> MoTechCo</a>
     <div class="nav-links">
       <a href="landing.html">Home</a>
-      <a href="index.html" aria-current="page">Analyzer</a>
+      <a href="index.html" class="active">Analyzer</a>
     </div>
   </nav>
 
-  <header class="header">
-    <div class="header-inner">
-      <span id="premiumBadge" class="premium-badge" hidden>Premium unlocked</span>
-      <h1>MoTechCo Resume Analyzer</h1>
-      <p>Free score. Premium ATS + job-match report. Built for tech and data roles.</p>
-      <div id="scoreBadge" class="score-badge" hidden>--/100</div>
+  <header class="page-hero">
+    <div class="page-hero-inner">
+      <p class="eyebrow">A MoTechCo product · Resume Analyzer</p>
+      <h1>Clear feedback on the resume you already have</h1>
+      <p class="hero-sub">Upload once, get a score and practical suggestions. Optional job-match when you paste a posting.</p>
+      <div class="hero-badges">
+        <span id="premiumBadge" class="status-pill" hidden>Premium active</span>
+        <span id="scoreBadge" class="score-pill" hidden>--/100</span>
+      </div>
     </div>
   </header>
 
-  <main>
-    <section class="card">
-      <h2>Upload Resume</h2>
-      <p class="helper-text">Choose a .pdf or .docx file, optionally paste a job description, then click <strong>Upload &amp; Analyze</strong>.</p>
+  <main class="page-main">
+    <div class="steps-row">
+      <div class="step-chip"><span>1</span> Upload</div>
+      <div class="step-chip"><span>2</span> Review score</div>
+      <div class="step-chip"><span>3</span> Improve &amp; share</div>
+    </div>
 
-      <label class="field-label" for="jobDescription">Target job description (optional — unlocks job-match analysis)</label>
-      <textarea id="jobDescription" rows="5" placeholder="Paste the job posting here to see how well your resume matches that role..."></textarea>
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Start your review</h2>
+        <p>Pdf or Word only. We extract text, analyze it, and show structured feedback — not a chatbot wall of text.</p>
+      </div>
+
+      <label class="field-label" for="jobDescription">Job posting <span class="label-soft">(optional)</span></label>
+      <textarea id="jobDescription" rows="4" placeholder="Paste the job description here for keyword match insights..."></textarea>
 
       <form id="uploadForm" enctype="multipart/form-data">
         <label class="field-label" for="resume">Resume file</label>
-        <input type="file" id="resume" name="resume" accept=".pdf,.docx" required />
+        <div class="file-drop">
+          <input type="file" id="resume" name="resume" accept=".pdf,.docx" required />
+        </div>
         <div class="actions">
-          <button type="submit" id="submitBtn">Upload &amp; Analyze</button>
-          <button type="button" id="analyzeBtn" class="secondary-btn" style="display: none;">Re-analyze</button>
+          <button type="submit" id="submitBtn" class="btn-primary">Upload &amp; Analyze</button>
+          <button type="button" id="analyzeBtn" class="btn-secondary" style="display: none;">Run again</button>
         </div>
       </form>
 
       <div id="loading" class="loading">Working...</div>
       <p id="loadingNote" class="loading-note"></p>
-
-      <div id="paywallBox" class="paywall-box" hidden>
-        <h3>Unlock your full AI report</h3>
-        <p>Free users see your score and top strengths. Premium unlocks weaknesses, ATS keywords, formatting fixes, and job-match insights.</p>
-        <ul>
-          <li>Full weaknesses breakdown</li>
-          <li>Complete keyword gap analysis</li>
-          <li>Formatting suggestions</li>
-          <li>Job description match score</li>
-          <li>Shareable score card for LinkedIn</li>
-        </ul>
-        <button type="button" id="unlockBtn" class="unlock-btn">Unlock Full Report — $4.99</button>
-        <p class="fine-print">Secure checkout via Stripe. <a href="privacy.html">Privacy policy</a></p>
-      </div>
-
-      <div id="referralPanel" class="referral-panel">
-        <h3>Refer a friend</h3>
-        <p class="section-note">Share your link — friends get one free premium report for 24 hours.</p>
-        <div class="referral-row">
-          <input id="referralLink" type="text" readonly />
-          <button type="button" id="copyReferralBtn" class="secondary-btn">Copy Referral Link</button>
-        </div>
-      </div>
-
-      <div id="jobMatchPanel" class="job-match-panel" hidden>
-        <h3>Job Match Breakdown</h3>
-        <p id="jobFitSummary" class="section-note"></p>
-        <div class="keyword-columns">
-          <div>
-            <h4>Matched keywords</h4>
-            <div id="matchedKeywords" class="keyword-list"></div>
-          </div>
-          <div>
-            <h4>Missing keywords</h4>
-            <div id="missingJobKeywords" class="keyword-list missing"></div>
-          </div>
-        </div>
-      </div>
-
-      <div id="sharePanel" class="share-panel" hidden>
-        <h3>Share &amp; export</h3>
-        <p class="section-note">Drive traffic and keep a copy of your results.</p>
-        <div class="share-actions">
-          <button type="button" id="downloadCardBtn" class="secondary-btn">Download Score Card</button>
-          <button type="button" id="downloadReportBtn" class="secondary-btn">Download Report (.txt)</button>
-          <button type="button" id="printReportBtn" class="secondary-btn">Print / Save PDF</button>
-          <button type="button" id="copyShareBtn" class="secondary-btn">Copy Share Text</button>
-          <button type="button" id="linkedinShareBtn" class="secondary-btn">Share on LinkedIn</button>
-          <button type="button" id="twitterShareBtn" class="secondary-btn">Share on X</button>
-        </div>
-      </div>
-
-      <div id="emailPanel" class="email-panel" hidden>
-        <h3>Email me my report</h3>
-        <p class="section-note">Get a copy in your inbox (premium reports only).</p>
-        <div class="email-row">
-          <input id="emailInput" type="email" placeholder="you@example.com" />
-          <button type="button" id="emailReportBtn" class="secondary-btn">Send Report</button>
-        </div>
-        <p id="emailStatus" class="fine-print"></p>
-      </div>
-
-      <h3>Parsed Text</h3>
-      <p class="section-note">Extracted from your uploaded file.</p>
-      <pre id="output"></pre>
-
-      <h3>AI Analysis</h3>
-      <p class="section-note">Score, strengths, weaknesses, and suggestions from Gemini.</p>
-      <pre id="analysisOutput"></pre>
     </section>
+
+    <section id="resultsSection" class="panel results-panel" hidden>
+      <div class="panel-head">
+        <h2>Your results</h2>
+        <p class="accuracy-note">Scores are guidance based on your uploaded text, not a hiring guarantee. Always review suggestions before applying.</p>
+      </div>
+      <div id="analysisResults" class="analysis-results"></div>
+    </section>
+
+    <section id="paywallBox" class="panel upgrade-panel" hidden>
+      <div class="upgrade-grid">
+        <div>
+          <p class="eyebrow dark">Premium report</p>
+          <h3>See the full picture</h3>
+          <p>Unlock weaknesses, keyword gaps, formatting fixes, job-match detail, exports, and share tools.</p>
+          <ul class="check-list">
+            <li>Full weaknesses breakdown</li>
+            <li>ATS keyword gaps</li>
+            <li>Formatting suggestions</li>
+            <li>Job match score &amp; keywords</li>
+          </ul>
+        </div>
+        <div class="upgrade-action">
+          <p class="price-tag">$4.99 <span>one-time</span></p>
+          <button type="button" id="unlockBtn" class="btn-primary btn-block">Unlock full report</button>
+          <p class="fine-print">Secure checkout via Stripe · <a href="privacy.html">Privacy</a></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="jobMatchPanel" class="panel" hidden>
+      <div class="panel-head"><h3>Job match</h3></div>
+      <p id="jobFitSummary" class="section-note"></p>
+      <div class="keyword-columns">
+        <div>
+          <h4>Matched</h4>
+          <div id="matchedKeywords" class="keyword-list"></div>
+        </div>
+        <div>
+          <h4>Missing</h4>
+          <div id="missingJobKeywords" class="keyword-list missing"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sharePanel" class="panel" hidden>
+      <div class="panel-head"><h3>Export &amp; share</h3><p>Keep a copy or post your progress.</p></div>
+      <div class="share-actions">
+        <button type="button" id="downloadCardBtn" class="btn-secondary">Score card</button>
+        <button type="button" id="downloadReportBtn" class="btn-secondary">Download report</button>
+        <button type="button" id="printReportBtn" class="btn-secondary">Print / PDF</button>
+        <button type="button" id="copyShareBtn" class="btn-secondary">Copy caption</button>
+        <button type="button" id="linkedinShareBtn" class="btn-secondary">LinkedIn</button>
+        <button type="button" id="twitterShareBtn" class="btn-secondary">X</button>
+      </div>
+    </section>
+
+    <section id="emailPanel" class="panel" hidden>
+      <div class="panel-head">
+        <h3>Email this report</h3>
+        <p id="emailHelpText">Send a copy to yourself after unlocking premium.</p>
+      </div>
+      <div class="email-row">
+        <input id="emailInput" type="email" placeholder="you@example.com" />
+        <button type="button" id="emailReportBtn" class="btn-primary">Send to my inbox</button>
+      </div>
+      <p id="emailStatus" class="fine-print"></p>
+    </section>
+
+    <section class="panel referral-panel">
+      <div class="panel-head"><h3>Share MoTechCo with a friend</h3><p>They get one premium report free for 24 hours.</p></div>
+      <div class="referral-row">
+        <input id="referralLink" type="text" readonly />
+        <button type="button" id="copyReferralBtn" class="btn-secondary">Copy link</button>
+      </div>
+    </section>
+
+    <details class="panel parsed-panel">
+      <summary>View extracted resume text</summary>
+      <pre id="output"></pre>
+    </details>
   </main>
 
-  <footer class="footer">
-    <p>© 2026 MoTechCo — Built with love in lilac & purple</p>
+  <footer class="site-footer">
+    <p>© 2026 MoTechCo</p>
     <p class="footer-links">
       <a href="landing.html">Home</a> ·
       <a href="privacy.html">Privacy</a> ·
-      <a href="terms.html">Terms</a> ·
-      <a href="https://resume.motechco.ca">Share this tool</a>
+      <a href="terms.html">Terms</a>
     </p>
   </footer>
 
