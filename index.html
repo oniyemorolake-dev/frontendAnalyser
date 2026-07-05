@@ -16,7 +16,7 @@
   <header class="simple-header">
     <a class="brand" href="landing.html">MoTechCo Resume Analyzer</a>
     <div class="header-meta">
-      <span id="premiumBadge" class="status-pill" hidden>Premium active</span>
+      <span id="premiumBadge" class="status-pill" hidden title="Full report and job-tailored rewrite are unlocked on this device.">Premium unlocked</span>
     </div>
   </header>
 
@@ -24,8 +24,8 @@
     <p class="intro-copy">Upload a PDF or Word resume. We extract the text, analyze it with Gemini, and show structured feedback.</p>
 
     <section class="panel">
-      <label class="field-label" for="jobDescription">Job posting <span class="label-soft">(optional)</span></label>
-      <textarea id="jobDescription" rows="3" placeholder="Paste a job description for keyword match insights..."></textarea>
+      <label class="field-label" for="jobDescription">Job posting <span class="label-soft">(paste for match + tailored rewrite)</span></label>
+      <textarea id="jobDescription" rows="4" placeholder="Paste the full job description here. Premium users can generate a rewritten resume aligned to this posting."></textarea>
 
       <form id="uploadForm" enctype="multipart/form-data">
         <label class="field-label" for="resume">Resume file</label>
@@ -66,11 +66,11 @@
 
       <div id="paywallBox" class="paywall-inline" hidden>
         <p class="paywall-title">Unlock the full premium report</p>
-        <p class="section-note">Includes weaknesses, ATS keyword gaps, formatting fixes, job-match detail, and a job-tailored resume rewrite.</p>
+        <p class="section-note">Includes weaknesses, ATS keyword gaps, formatting fixes, job-match detail, and a job-tailored resume you can copy and paste.</p>
         <p class="price-tag compact">$4.99 <span>one-time</span></p>
         <button type="button" id="unlockBtn" class="btn-primary">Unlock full report — $4.99</button>
         <p id="paymentStatus" class="payment-status" hidden></p>
-        <p class="fine-print">Secure checkout via Stripe · <a href="privacy.html">Privacy</a></p>
+        <p class="fine-print">Secure checkout via Stripe · By paying you agree to our <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a></p>
       </div>
     </section>
 
@@ -89,15 +89,39 @@
       </div>
     </section>
 
-    <section id="rewritePanel" class="panel" hidden>
-      <h3>Job-tailored resume rewrite</h3>
-      <p class="section-note">Premium: paste a job posting above, then generate a rewritten resume aligned to that role using only your real experience.</p>
-      <div class="actions">
-        <button type="button" id="rewriteBtn" class="btn-primary">Generate tailored resume</button>
-        <button type="button" id="downloadRewriteBtn" class="btn-secondary" style="display: none;">Download rewritten resume</button>
+    <section id="rewritePanel" class="panel rewrite-panel">
+      <div class="rewrite-head">
+        <div>
+          <p class="eyebrow dark">Premium feature</p>
+          <h3>Tailor your resume to the job posting</h3>
+          <p class="section-note">Generate a rewritten resume aligned to the job description above. Copy it, paste into Word, and edit before applying.</p>
+        </div>
+        <span id="rewritePremiumTag" class="rewrite-tag locked">Locked</span>
       </div>
-      <p id="rewriteStatus" class="fine-print"></p>
-      <pre id="rewriteOutput">Your tailored resume will appear here.</pre>
+
+      <ol class="rewrite-steps">
+        <li>Paste the job description at the top of this page.</li>
+        <li>Upload your current resume.</li>
+        <li>Click <strong>Generate tailored resume</strong>.</li>
+        <li>Use <strong>Copy resume text</strong> and paste into your document.</li>
+      </ol>
+
+      <div id="rewriteLocked" class="rewrite-locked">
+        <p>Unlock premium to generate a job-tailored rewrite using your real experience only — no fake jobs or skills added.</p>
+        <button type="button" id="rewriteUnlockBtn" class="btn-secondary">Unlock premium — $4.99</button>
+      </div>
+
+      <div id="rewriteTools" hidden>
+        <div class="actions">
+          <button type="button" id="rewriteBtn" class="btn-primary">Generate tailored resume</button>
+          <button type="button" id="copyRewriteBtn" class="btn-secondary" style="display: none;">Copy resume text</button>
+          <button type="button" id="downloadRewriteBtn" class="btn-secondary" style="display: none;">Download .txt</button>
+        </div>
+        <p id="rewriteStatus" class="fine-print"></p>
+        <label class="field-label" for="rewriteOutput">Rewritten resume — ready to copy</label>
+        <pre id="rewriteOutput" tabindex="0">Your tailored resume will appear here after you generate it.</pre>
+        <p class="fine-print rewrite-disclaimer">AI rewrite uses only facts from your uploaded resume. Review everything before applying. See <a href="terms.html">Terms</a>.</p>
+      </div>
     </section>
 
     <section id="sharePanel" class="panel" hidden>
@@ -124,8 +148,8 @@
 
     <section id="contactPanel" class="panel contact-panel">
       <h3>Need help?</h3>
-      <p id="contactHelpText" class="section-note">Questions about your report, premium access, or a custom review?</p>
-      <p><a id="contactEmailLink" href="mailto:hello@motechco.ca">hello@motechco.ca</a></p>
+      <p id="contactHelpText" class="section-note">Questions about your report, premium access, payment, or a custom review?</p>
+      <p><a id="contactEmailLink" href="mailto:mowebsiteco@gmail.com?subject=MoTechCo%20Resume%20Analyzer%20help">mowebsiteco@gmail.com</a></p>
     </section>
 
     <section class="panel referral-panel">

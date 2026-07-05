@@ -16,6 +16,11 @@ const rewritePanel = document.getElementById("rewritePanel");
 const rewriteBtn = document.getElementById("rewriteBtn");
 const rewriteOutput = document.getElementById("rewriteOutput");
 const rewriteStatus = document.getElementById("rewriteStatus");
+const rewriteLocked = document.getElementById("rewriteLocked");
+const rewriteTools = document.getElementById("rewriteTools");
+const rewritePremiumTag = document.getElementById("rewritePremiumTag");
+const rewriteUnlockBtn = document.getElementById("rewriteUnlockBtn");
+const copyRewriteBtn = document.getElementById("copyRewriteBtn");
 const downloadRewriteBtn = document.getElementById("downloadRewriteBtn");
 const contactHelpText = document.getElementById("contactHelpText");
 const contactEmailLink = document.getElementById("contactEmailLink");
@@ -167,11 +172,32 @@ function setUnlockToken(token) {
 function applyPremiumUi(sourceLabel) {
   premiumBadge.hidden = false;
   premiumBadge.textContent =
-    sourceLabel === "referral" ? "Referral access active" : "Premium active";
+    sourceLabel === "referral" ? "Referral premium unlocked" : "Premium unlocked";
+  premiumBadge.title =
+    "Full report and job-tailored rewrite are unlocked on this device for up to 30 days.";
   updatePaywallUi(true);
-  if (rewritePanel) rewritePanel.hidden = false;
+  updateRewriteUi(true);
   if (sharePanel) sharePanel.hidden = false;
   if (emailPanel) emailPanel.hidden = false;
+}
+
+function updateRewriteUi(isPremium) {
+  if (!rewriteLocked || !rewriteTools || !rewritePremiumTag) return;
+
+  if (isPremium) {
+    rewriteLocked.hidden = true;
+    rewriteTools.hidden = false;
+    rewritePremiumTag.textContent = "Unlocked";
+    rewritePremiumTag.className = "rewrite-tag unlocked";
+  } else {
+    rewriteLocked.hidden = false;
+    rewriteTools.hidden = true;
+    rewritePremiumTag.textContent = "Locked";
+    rewritePremiumTag.className = "rewrite-tag locked";
+    latestRewrite = "";
+    if (copyRewriteBtn) copyRewriteBtn.style.display = "none";
+    if (downloadRewriteBtn) downloadRewriteBtn.style.display = "none";
+  }
 }
 
 function setLoading(active, message, note) {
@@ -276,14 +302,11 @@ function updateResultsUi(data) {
   renderJobMatchPanel(data);
 
   const isPremium = data.tier === "premium" || data.locked === false;
-  premiumBadge.hidden = !isPremium;
-  premiumBadge.textContent = getUnlockToken().startsWith("referral_")
-    ? "Referral access active"
-    : "Premium active";
-  sharePanel.hidden = !isPremium;
-  emailPanel.hidden = !isPremium;
-  if (rewritePanel) rewritePanel.hidden = !isPremium;
+  if (isPremium) applyPremiumUi(getUnlockToken().startsWith("referral_") ? "referral" : "stripe");
+  else updateRewriteUi(false);
   updatePaywallUi(isPremium);
+  if (sharePanel) sharePanel.hidden = !isPremium;
+  if (emailPanel) emailPanel.hidden = !isPremium;
 }
 
 function isValidResumeText(text) {
@@ -460,6 +483,7 @@ async function generateRewrite() {
     latestRewrite = data.rewrittenResume || "";
     rewriteOutput.textContent = latestRewrite;
     rewriteStatus.textContent = data.disclaimer || "Review before applying.";
+    if (copyRewriteBtn) copyRewriteBtn.style.display = "inline-block";
     if (downloadRewriteBtn) downloadRewriteBtn.style.display = "inline-block";
   } catch (_) {
     rewriteStatus.textContent = "Could not generate rewrite right now. Try again in a moment.";
@@ -478,6 +502,7 @@ async function loadPricing() {
   }
 
   updatePaywallUi(Boolean(getUnlockToken()));
+  updateRewriteUi(Boolean(getUnlockToken()));
 }
 
 async function redeemReferralFromUrl() {
@@ -599,7 +624,6 @@ async function runAnalysis(resumeText) {
   paywallBox.hidden = true;
   sharePanel.hidden = true;
   emailPanel.hidden = true;
-  if (rewritePanel) rewritePanel.hidden = true;
   jobMatchPanel.hidden = true;
 
   const payload = {
@@ -694,7 +718,6 @@ form.addEventListener("submit", async (e) => {
   paywallBox.hidden = true;
   sharePanel.hidden = true;
   emailPanel.hidden = true;
-  if (rewritePanel) rewritePanel.hidden = true;
   jobMatchPanel.hidden = true;
 
   const formData = new FormData();
@@ -736,6 +759,26 @@ analyzeBtn.addEventListener("click", async () => {
 });
 
 if (rewriteBtn) rewriteBtn.addEventListener("click", generateRewrite);
+
+if (rewriteUnlockBtn) rewriteUnlockBtn.addEventListener("click", startCheckout);
+
+if (copyRewriteBtn) {
+  copyRewriteBtn.addEventListener("click", async () => {
+    if (!latestRewrite) return;
+    try {
+      await navigator.clipboard.writeText(latestRewrite);
+      copyRewriteBtn.textContent = "Copied!";
+      rewriteStatus.textContent = "Copied to clipboard. Paste into Word, Google Docs, or your application form.";
+      setTimeout(() => {
+        copyRewriteBtn.textContent = "Copy resume text";
+      }, 1800);
+    } catch (_) {
+      rewriteOutput.focus();
+      document.getSelection()?.selectAllChildren(rewriteOutput);
+      rewriteStatus.textContent = "Select the text above and press Ctrl+C to copy.";
+    }
+  });
+}
 
 if (downloadRewriteBtn) {
   downloadRewriteBtn.addEventListener("click", () => {
@@ -817,6 +860,8 @@ restoreResumeDraft();
 loadPricing();
 loadEmailStatus();
 loadContactInfo();
-restorePremiumAccess();
+restorePremiumAccess().then(() => {
+  if (getUnlockToken()) updateRewriteUi(true);
+});
 redeemReferralFromUrl();
 verifyPaymentFromUrl();
