@@ -12,6 +12,22 @@ Add these environment variables:
 | `FRONTEND_URL` | `https://resume.motechco.ca` | Stripe redirect URLs |
 | `PREMIUM_PRICE_LABEL` | `$4.99` | Display label (optional) |
 | `PREMIUM_FREE_MODE` | `true` | Bypass paywall for testing only |
+| `AI_REQUESTS_PER_MINUTE` | `6` | Max AI calls per visitor per minute (protects quota) |
+| `CONTACT_EMAIL` | `mowebsiteco@gmail.com` | Support email shown on site |
+
+## Permanent fix for Google AI quota errors
+
+Creating new API keys only resets the **free** limit temporarily. The permanent fix:
+
+1. Open [Google AI Studio](https://aistudio.google.com)
+2. Go to your project → **Google Cloud Console** (link in settings)
+3. **Billing** → link a billing account (credit card)
+4. Keep your **same** `GEMINI_API_KEY` on Render — no need to rotate keys
+5. Usage is **pay-as-you-go** (Gemini Flash is very cheap; a resume analysis is usually fractions of a cent)
+
+At $4.99 premium per report, AI cost is tiny compared to revenue.
+
+Optional: upgrade Render from free tier to reduce cold-start delays (separate from Gemini quota).
 
 ## Stripe setup (5 minutes)
 
