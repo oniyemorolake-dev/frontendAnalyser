@@ -60,7 +60,19 @@ const ANALYSIS_PLACEHOLDER =
   "Your AI feedback will appear here after you upload a resume.";
 
 const COLD_START_NOTE =
-  "First request after idle may take up to 60 seconds on the free tier.";
+  "First request after idle may take up to 60 seconds on the free hosting tier.";
+
+const ANALYZE_TIMEOUT_MS = 90000;
+
+async function fetchWithTimeout(url, options, timeoutMs = ANALYZE_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 let latestAnalysis = null;
 let latestRewrite = "";
@@ -633,7 +645,7 @@ async function runAnalysis(resumeText) {
   };
 
   try {
-    const res = await fetch(`${API_BASE}/api/resume/analyze`, {
+    const res = await fetchWithTimeout(`${API_BASE}/api/resume/analyze`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -642,18 +654,23 @@ async function runAnalysis(resumeText) {
     const data = await res.json();
 
     if (!res.ok) {
-      const detail = data.detail ? ` Details: ${data.detail}` : "";
-      const friendly = /not found|not supported|gemini/i.test(String(data.detail || data.error))
-        ? "Our AI service hit a temporary model issue. Wait 30 seconds, then click Run again."
-        : `${data.error || "Analysis failed."}${detail} Try again in a moment.`;
+      const friendly =
+        data.detail ||
+        data.error ||
+        "Analysis failed. Try again in a moment.";
       showAnalysisMessage(friendly);
       return false;
     }
 
     updateResultsUi(data);
     return true;
-  } catch (_) {
-    showAnalysisMessage('Analysis failed. The backend may be waking up — wait about 60 seconds, then click "Run again".');
+  } catch (err) {
+    const timedOut = err?.name === "AbortError";
+    showAnalysisMessage(
+      timedOut
+        ? 'This is taking too long — likely Google AI quota or the server waking up. Wait 1 minute, then click "Run again".'
+        : 'Analysis failed. Wait about 60 seconds, then click "Run again".'
+    );
     return false;
   } finally {
     setLoading(false);
