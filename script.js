@@ -100,6 +100,7 @@ const flowStep2 = document.getElementById("flowStep2");
 const flowStep3 = document.getElementById("flowStep3");
 const kitGrid = document.getElementById("kitGrid");
 const resumeInput = document.getElementById("resume");
+const clearBtn = document.getElementById("clearBtn");
 
 const API_BASE = "https://backendaianalysers.onrender.com";
 const SITE_URL = "https://resume.motechco.ca";
@@ -763,22 +764,23 @@ function saveResumeDraft() {
   const text = output?.textContent?.trim() || "";
   const job = jobDescriptionInput?.value?.trim() || "";
   if (isValidResumeText(text)) {
-    localStorage.setItem(RESUME_STORAGE_KEY, text);
     sessionStorage.setItem(RESUME_STORAGE_KEY, text);
   }
-  localStorage.setItem(JOB_STORAGE_KEY, job);
   sessionStorage.setItem(JOB_STORAGE_KEY, job);
+  // Clean up any drafts persisted by older versions so they don't linger forever.
+  localStorage.removeItem(RESUME_STORAGE_KEY);
+  localStorage.removeItem(JOB_STORAGE_KEY);
 }
 
 function restoreResumeDraft() {
-  const savedResume =
-    localStorage.getItem(RESUME_STORAGE_KEY) ||
-    sessionStorage.getItem(RESUME_STORAGE_KEY) ||
-    "";
-  const savedJob =
-    localStorage.getItem(JOB_STORAGE_KEY) ||
-    sessionStorage.getItem(JOB_STORAGE_KEY) ||
-    "";
+  // Only restore within the same browser session (survives refresh + Stripe
+  // checkout redirect, but a fresh visit / closed browser starts clean).
+  const savedResume = sessionStorage.getItem(RESUME_STORAGE_KEY) || "";
+  const savedJob = sessionStorage.getItem(JOB_STORAGE_KEY) || "";
+
+  // Remove any stale drafts left in localStorage by older builds.
+  localStorage.removeItem(RESUME_STORAGE_KEY);
+  localStorage.removeItem(JOB_STORAGE_KEY);
 
   if (savedResume && output && isValidResumeText(savedResume)) {
     output.textContent = savedResume;
@@ -790,6 +792,58 @@ function restoreResumeDraft() {
 
   updateJobCharCount();
   return savedResume;
+}
+
+function clearStaleDraftDisplay() {
+  // Older builds saved drafts to localStorage, which persisted across sessions
+  // and made the job posting "stick" on every refresh. Purge those remnants.
+  localStorage.removeItem(RESUME_STORAGE_KEY);
+  localStorage.removeItem(JOB_STORAGE_KEY);
+}
+
+function clearAnalysis(options = {}) {
+  const { keepFocus = true } = options;
+
+  latestAnalysis = null;
+  latestRewrite = "";
+  latestCoverLetter = "";
+  latestLinkedInAbout = "";
+  latestInterviewPrep = "";
+
+  sessionStorage.removeItem(RESUME_STORAGE_KEY);
+  sessionStorage.removeItem(JOB_STORAGE_KEY);
+  localStorage.removeItem(RESUME_STORAGE_KEY);
+  localStorage.removeItem(JOB_STORAGE_KEY);
+
+  if (jobDescriptionInput) jobDescriptionInput.value = "";
+  if (resumeInput) resumeInput.value = "";
+  if (output) output.textContent = OUTPUT_PLACEHOLDER;
+  if (analysisOutput) analysisOutput.textContent = ANALYSIS_PLACEHOLDER;
+
+  if (resultsZone) resultsZone.hidden = true;
+  if (scoreHero) scoreHero.hidden = true;
+  if (paywallBox) paywallBox.hidden = true;
+  if (previewBlurWrap) previewBlurWrap.hidden = true;
+  if (jobMatchPanel) jobMatchPanel.hidden = true;
+  if (freeLeadPanel) freeLeadPanel.hidden = true;
+  if (sharePanel) sharePanel.hidden = true;
+  if (emailPanel) emailPanel.hidden = true;
+  if (stickyUnlockBar) stickyUnlockBar.hidden = true;
+  if (quotaHelp) quotaHelp.hidden = true;
+
+  const demoBadge = document.getElementById("demoSampleBadge");
+  if (demoBadge) demoBadge.hidden = true;
+
+  if (analyzeBtn) analyzeBtn.style.display = "none";
+  if (freeLeadStatus) freeLeadStatus.textContent = "";
+
+  updateJobCharCount();
+  setFlowStep(1);
+
+  if (keepFocus && jobDescriptionInput) {
+    jobDescriptionInput.focus();
+    jobDescriptionInput.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
 }
 
 function showPremiumWelcome() {
@@ -1244,23 +1298,30 @@ async function saveFreeScoreEmail() {
   }
 }
 
-function handleCheckoutCanceled() {
+async function handleCheckoutCanceled() {
   const params = new URLSearchParams(window.location.search);
   if (params.get("canceled") !== "1") return;
-
-  showPaymentStatus(
-    "Checkout canceled — your free score is still saved. Unlock anytime when you are ready.",
-    false
-  );
-  paywallBox.hidden = false;
-  if (latestAnalysis) {
-    updateStickyUnlockBar(false, latestAnalysis);
-    updateFreeLeadPanel(false, latestAnalysis);
-  }
 
   params.delete("canceled");
   const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
   window.history.replaceState({}, "", next);
+
+  // The user came back from Stripe without paying — bring their work back so
+  // they don't have to re-paste the job and re-upload the resume.
+  const savedResume = restoreResumeDraft();
+  if (!latestAnalysis && isValidResumeText(savedResume)) {
+    await runAnalysis(savedResume);
+  }
+
+  showPaymentStatus(
+    "Checkout canceled — your free score is still here. Unlock anytime when you are ready.",
+    false
+  );
+  if (paywallBox) paywallBox.hidden = false;
+  if (latestAnalysis) {
+    updateStickyUnlockBar(false, latestAnalysis);
+    updateFreeLeadPanel(false, latestAnalysis);
+  }
 }
 
 async function loadPricing() {
@@ -1767,7 +1828,14 @@ if (jobDescriptionInput) {
 if (resumeInput) {
   resumeInput.addEventListener("change", updateFlowFromForm);
 }
-restoreResumeDraft();
+if (clearBtn) {
+  clearBtn.addEventListener("click", () => clearAnalysis());
+}
+// Intentionally do NOT auto-restore on a normal page load / refresh — a fresh
+// visit should start clean. Drafts are only restored when returning from the
+// Stripe checkout or a referral link (see the handlers below), so a user's work
+// survives the payment round-trip without lingering confusingly after a refresh.
+clearStaleDraftDisplay();
 updateFlowFromForm();
 warmBackend();
 loadPricing();

@@ -290,6 +290,26 @@ textarea:focus,
   width: 100%;
 }
 
+.btn-ghost {
+  border: none;
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 13px 14px;
+  border-radius: 999px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.btn-ghost:hover {
+  color: var(--brand);
+  background: var(--brand-soft);
+  text-decoration: none;
+}
+
 .loading {
   display: none;
   margin-top: 18px;
