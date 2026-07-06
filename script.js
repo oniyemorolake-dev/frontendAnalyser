@@ -34,6 +34,27 @@ const coverLetterPremiumTag = document.getElementById("coverLetterPremiumTag");
 const coverLetterUnlockBtn = document.getElementById("coverLetterUnlockBtn");
 const copyCoverLetterBtn = document.getElementById("copyCoverLetterBtn");
 const downloadCoverLetterBtn = document.getElementById("downloadCoverLetterBtn");
+const linkedInPanel = document.getElementById("linkedInPanel");
+const linkedInInput = document.getElementById("linkedInInput");
+const linkedInBtn = document.getElementById("linkedInBtn");
+const linkedInOutput = document.getElementById("linkedInOutput");
+const linkedInStatus = document.getElementById("linkedInStatus");
+const linkedInLocked = document.getElementById("linkedInLocked");
+const linkedInTools = document.getElementById("linkedInTools");
+const linkedInPremiumTag = document.getElementById("linkedInPremiumTag");
+const linkedInUnlockBtn = document.getElementById("linkedInUnlockBtn");
+const copyLinkedInBtn = document.getElementById("copyLinkedInBtn");
+const downloadLinkedInBtn = document.getElementById("downloadLinkedInBtn");
+const interviewPanel = document.getElementById("interviewPanel");
+const interviewBtn = document.getElementById("interviewBtn");
+const interviewOutput = document.getElementById("interviewOutput");
+const interviewStatus = document.getElementById("interviewStatus");
+const interviewLocked = document.getElementById("interviewLocked");
+const interviewTools = document.getElementById("interviewTools");
+const interviewPremiumTag = document.getElementById("interviewPremiumTag");
+const interviewUnlockBtn = document.getElementById("interviewUnlockBtn");
+const copyInterviewBtn = document.getElementById("copyInterviewBtn");
+const downloadInterviewBtn = document.getElementById("downloadInterviewBtn");
 const contactHelpText = document.getElementById("contactHelpText");
 const contactEmailLink = document.getElementById("contactEmailLink");
 const sharePanel = document.getElementById("sharePanel");
@@ -99,6 +120,8 @@ async function fetchWithTimeout(url, options, timeoutMs = ANALYZE_TIMEOUT_MS) {
 let latestAnalysis = null;
 let latestRewrite = "";
 let latestCoverLetter = "";
+let latestLinkedInAbout = "";
+let latestInterviewPrep = "";
 let pricing = { priceLabel: "$4.99", stripeConfigured: false };
 let emailDeliveryEnabled = false;
 
@@ -229,12 +252,52 @@ function applyPremiumUi(sourceLabel) {
   premiumBadge.textContent =
     sourceLabel === "referral" ? "Referral premium unlocked" : "Premium unlocked";
   premiumBadge.title =
-    "Full report, resume rewrite, and cover letter are unlocked on this device for up to 30 days.";
+    "Full application kit unlocked on this device for up to 30 days.";
   updatePaywallUi(true);
   updateRewriteUi(true);
   updateCoverLetterUi(true);
+  updateLinkedInUi(true);
+  updateInterviewUi(true);
   if (sharePanel) sharePanel.hidden = false;
   if (emailPanel) emailPanel.hidden = false;
+}
+
+function updateLinkedInUi(isPremium) {
+  if (!linkedInLocked || !linkedInTools || !linkedInPremiumTag) return;
+
+  if (isPremium) {
+    linkedInLocked.hidden = true;
+    linkedInTools.hidden = false;
+    linkedInPremiumTag.textContent = "Unlocked";
+    linkedInPremiumTag.className = "rewrite-tag unlocked";
+  } else {
+    linkedInLocked.hidden = false;
+    linkedInTools.hidden = true;
+    linkedInPremiumTag.textContent = "Locked";
+    linkedInPremiumTag.className = "rewrite-tag locked";
+    latestLinkedInAbout = "";
+    if (copyLinkedInBtn) copyLinkedInBtn.style.display = "none";
+    if (downloadLinkedInBtn) downloadLinkedInBtn.style.display = "none";
+  }
+}
+
+function updateInterviewUi(isPremium) {
+  if (!interviewLocked || !interviewTools || !interviewPremiumTag) return;
+
+  if (isPremium) {
+    interviewLocked.hidden = true;
+    interviewTools.hidden = false;
+    interviewPremiumTag.textContent = "Unlocked";
+    interviewPremiumTag.className = "rewrite-tag unlocked";
+  } else {
+    interviewLocked.hidden = false;
+    interviewTools.hidden = true;
+    interviewPremiumTag.textContent = "Locked";
+    interviewPremiumTag.className = "rewrite-tag locked";
+    latestInterviewPrep = "";
+    if (copyInterviewBtn) copyInterviewBtn.style.display = "none";
+    if (downloadInterviewBtn) downloadInterviewBtn.style.display = "none";
+  }
 }
 
 function updateCoverLetterUi(isPremium) {
@@ -417,6 +480,8 @@ function updateResultsUi(data) {
   else {
     updateRewriteUi(false);
     updateCoverLetterUi(false);
+    updateLinkedInUi(false);
+    updateInterviewUi(false);
   }
   updatePaywallUi(isPremium);
   updateStickyUnlockBar(isPremium, data);
@@ -548,6 +613,8 @@ async function restorePremiumAccess() {
       updatePaywallUi(false);
       updateRewriteUi(false);
       updateCoverLetterUi(false);
+      updateLinkedInUi(false);
+      updateInterviewUi(false);
     }
   } catch (_) {
     /* ignore */
@@ -697,6 +764,175 @@ async function generateCoverLetter() {
     coverLetterOutput.textContent = "Your cover letter will appear here after you generate it.";
   } finally {
     coverLetterBtn.disabled = false;
+  }
+}
+
+function formatInterviewPrep(data) {
+  const lines = ["MoTechCo Interview Prep", ""];
+
+  if (Array.isArray(data.prepTips) && data.prepTips.length > 0) {
+    lines.push("Tips before the interview:");
+    data.prepTips.forEach((tip) => lines.push(`  • ${tip}`));
+    lines.push("");
+  }
+
+  if (Array.isArray(data.questions)) {
+    data.questions.forEach((item, index) => {
+      lines.push(`${index + 1}. ${item.question || "Question"}`);
+      if (Array.isArray(item.answerHints)) {
+        item.answerHints.forEach((hint) => lines.push(`   • ${hint}`));
+      }
+      lines.push("");
+    });
+  }
+
+  lines.push("https://resume.motechco.ca");
+  return lines.join("\n").trim();
+}
+
+async function generateLinkedInAbout() {
+  const resumeText = output?.textContent?.trim() || "";
+  const jobText = jobDescriptionInput?.value?.trim() || "";
+  const currentAbout = linkedInInput?.value?.trim() || "";
+
+  if (!getUnlockToken()) {
+    linkedInStatus.textContent = "Unlock premium to optimize LinkedIn.";
+    return;
+  }
+
+  if (!isValidResumeText(resumeText)) {
+    linkedInStatus.textContent = "Upload your resume first.";
+    return;
+  }
+
+  if (jobText.length < 40) {
+    linkedInStatus.className = "fine-print payment-status error";
+    linkedInStatus.textContent = `Paste the full job posting above. Need at least 40 characters.`;
+    return;
+  }
+
+  linkedInBtn.disabled = true;
+  linkedInStatus.className = "fine-print";
+  linkedInStatus.textContent = "Optimizing your LinkedIn About... up to 90 seconds.";
+  linkedInOutput.textContent = "Working...";
+
+  try {
+    const res = await fetchWithTimeout(
+      `${API_BASE}/api/resume/optimize-linkedin`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: resumeText,
+          jobDescription: jobText,
+          linkedinAbout: currentAbout,
+          unlockToken: getUnlockToken(),
+        }),
+      },
+      120000
+    );
+    const data = await res.json();
+
+    if (!res.ok) {
+      linkedInStatus.className = "fine-print payment-status error";
+      if (res.status === 402) {
+        linkedInStatus.textContent = "Premium could not be verified. Refresh the page.";
+        setUnlockToken("");
+        updateLinkedInUi(false);
+      } else {
+        linkedInStatus.textContent = data.detail || data.error || "Could not optimize LinkedIn About.";
+      }
+      linkedInOutput.textContent = "Your LinkedIn About will appear here.";
+      return;
+    }
+
+    latestLinkedInAbout = data.linkedInAbout || "";
+    linkedInOutput.textContent = latestLinkedInAbout;
+    linkedInStatus.className = "fine-print";
+    linkedInStatus.textContent = data.disclaimer || "Review before posting on LinkedIn.";
+    if (copyLinkedInBtn) copyLinkedInBtn.style.display = "inline-block";
+    if (downloadLinkedInBtn) downloadLinkedInBtn.style.display = "inline-block";
+  } catch (err) {
+    linkedInStatus.className = "fine-print payment-status error";
+    linkedInStatus.textContent =
+      err?.name === "AbortError"
+        ? "Timed out — wait 1 minute, then try again."
+        : "Could not optimize LinkedIn right now.";
+    linkedInOutput.textContent = "Your LinkedIn About will appear here.";
+  } finally {
+    linkedInBtn.disabled = false;
+  }
+}
+
+async function generateInterviewPrep() {
+  const resumeText = output?.textContent?.trim() || "";
+  const jobText = jobDescriptionInput?.value?.trim() || "";
+
+  if (!getUnlockToken()) {
+    interviewStatus.textContent = "Unlock premium for interview prep.";
+    return;
+  }
+
+  if (!isValidResumeText(resumeText)) {
+    interviewStatus.textContent = "Upload your resume first.";
+    return;
+  }
+
+  if (jobText.length < 40) {
+    interviewStatus.className = "fine-print payment-status error";
+    interviewStatus.textContent = `Paste the full job posting above. Need at least 40 characters.`;
+    return;
+  }
+
+  interviewBtn.disabled = true;
+  interviewStatus.className = "fine-print";
+  interviewStatus.textContent = "Generating interview questions... up to 90 seconds.";
+  interviewOutput.textContent = "Working...";
+
+  try {
+    const res = await fetchWithTimeout(
+      `${API_BASE}/api/resume/interview-prep`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: resumeText,
+          jobDescription: jobText,
+          unlockToken: getUnlockToken(),
+        }),
+      },
+      120000
+    );
+    const data = await res.json();
+
+    if (!res.ok) {
+      interviewStatus.className = "fine-print payment-status error";
+      if (res.status === 402) {
+        interviewStatus.textContent = "Premium could not be verified. Refresh the page.";
+        setUnlockToken("");
+        updateInterviewUi(false);
+      } else {
+        interviewStatus.textContent = data.detail || data.error || "Could not generate interview prep.";
+      }
+      interviewOutput.textContent = "Interview questions and hints will appear here.";
+      return;
+    }
+
+    latestInterviewPrep = formatInterviewPrep(data);
+    interviewOutput.textContent = latestInterviewPrep;
+    interviewStatus.className = "fine-print";
+    interviewStatus.textContent = data.disclaimer || "Practice out loud with your real examples.";
+    if (copyInterviewBtn) copyInterviewBtn.style.display = "inline-block";
+    if (downloadInterviewBtn) downloadInterviewBtn.style.display = "inline-block";
+  } catch (err) {
+    interviewStatus.className = "fine-print payment-status error";
+    interviewStatus.textContent =
+      err?.name === "AbortError"
+        ? "Timed out — wait 1 minute, then try again."
+        : "Could not generate interview prep right now.";
+    interviewOutput.textContent = "Interview questions and hints will appear here.";
+  } finally {
+    interviewBtn.disabled = false;
   }
 }
 
@@ -1041,6 +1277,60 @@ if (coverLetterBtn) coverLetterBtn.addEventListener("click", generateCoverLetter
 
 if (coverLetterUnlockBtn) coverLetterUnlockBtn.addEventListener("click", startCheckout);
 
+if (linkedInBtn) linkedInBtn.addEventListener("click", generateLinkedInAbout);
+if (linkedInUnlockBtn) linkedInUnlockBtn.addEventListener("click", startCheckout);
+
+if (interviewBtn) interviewBtn.addEventListener("click", generateInterviewPrep);
+if (interviewUnlockBtn) interviewUnlockBtn.addEventListener("click", startCheckout);
+
+function wireCopyDownload(copyBtn, downloadBtn, getText, outputEl, statusEl, copyLabel, filename) {
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      const text = getText();
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = "Copied!";
+        if (statusEl) statusEl.textContent = "Copied to clipboard.";
+        setTimeout(() => {
+          copyBtn.textContent = copyLabel;
+        }, 1800);
+      } catch (_) {
+        if (outputEl) {
+          outputEl.focus();
+          document.getSelection()?.selectAllChildren(outputEl);
+        }
+      }
+    });
+  }
+  if (downloadBtn) {
+    downloadBtn.addEventListener("click", () => {
+      const text = getText();
+      if (text) downloadTextFile(filename, text);
+    });
+  }
+}
+
+wireCopyDownload(
+  copyLinkedInBtn,
+  downloadLinkedInBtn,
+  () => latestLinkedInAbout,
+  linkedInOutput,
+  linkedInStatus,
+  "Copy About",
+  "motechco-linkedin-about.txt"
+);
+
+wireCopyDownload(
+  copyInterviewBtn,
+  downloadInterviewBtn,
+  () => latestInterviewPrep,
+  interviewOutput,
+  interviewStatus,
+  "Copy prep",
+  "motechco-interview-prep.txt"
+);
+
 if (copyCoverLetterBtn) {
   copyCoverLetterBtn.addEventListener("click", async () => {
     if (!latestCoverLetter) return;
@@ -1178,6 +1468,8 @@ restorePremiumAccess().then(() => {
   if (getUnlockToken()) {
     updateRewriteUi(true);
     updateCoverLetterUi(true);
+    updateLinkedInUi(true);
+    updateInterviewUi(true);
   }
 });
 handleCheckoutCanceled();

@@ -872,9 +872,11 @@ textarea,
   outline: 2px solid rgba(91, 45, 130, 0.2);
 }
 
-#coverLetterOutput {
+#coverLetterOutput,
+#linkedInOutput,
+#interviewOutput {
   margin-top: 8px;
-  min-height: 160px;
+  min-height: 140px;
   max-height: 380px;
   overflow: auto;
   cursor: text;

@@ -100,6 +100,8 @@
           <li>Weaknesses + ATS keyword gaps</li>
           <li>Job-tailored resume rewrite</li>
           <li>Job-tailored cover letter</li>
+          <li>LinkedIn About optimizer</li>
+          <li>Interview question prep</li>
           <li>Download, print, email &amp; share</li>
         </ul>
         <p class="price-tag compact"><span id="paywallPrice">$4.99</span> <span>one-time · 30 days on this device</span></p>
@@ -184,6 +186,61 @@
         <label class="field-label" for="coverLetterOutput">Cover letter — ready to copy</label>
         <pre id="coverLetterOutput" tabindex="0">Your cover letter will appear here after you generate it.</pre>
         <p class="fine-print rewrite-disclaimer">Review and add your contact details before sending. See <a href="terms.html">Terms</a>.</p>
+      </div>
+    </section>
+
+    <section id="linkedInPanel" class="panel rewrite-panel">
+      <div class="rewrite-head">
+        <div>
+          <p class="eyebrow dark">Premium feature</p>
+          <h3>Optimize your LinkedIn About section</h3>
+          <p class="section-note">Tailored to the job posting above. Optionally paste your current About text to improve it.</p>
+        </div>
+        <span id="linkedInPremiumTag" class="rewrite-tag locked">Locked</span>
+      </div>
+
+      <div id="linkedInLocked" class="rewrite-locked">
+        <p>Unlock premium to generate a job-aligned LinkedIn About section from your resume.</p>
+        <button type="button" id="linkedInUnlockBtn" class="btn-secondary">Unlock premium — $4.99</button>
+      </div>
+
+      <div id="linkedInTools" hidden>
+        <label class="field-label" for="linkedInInput">Current LinkedIn About (optional)</label>
+        <textarea id="linkedInInput" class="paste-field" rows="4" placeholder="Paste your current About section, or leave blank to generate from your resume."></textarea>
+        <div class="actions">
+          <button type="button" id="linkedInBtn" class="btn-primary">Optimize LinkedIn About</button>
+          <button type="button" id="copyLinkedInBtn" class="btn-secondary" style="display: none;">Copy About</button>
+          <button type="button" id="downloadLinkedInBtn" class="btn-secondary" style="display: none;">Download .txt</button>
+        </div>
+        <p id="linkedInStatus" class="fine-print"></p>
+        <label class="field-label" for="linkedInOutput">Optimized About — ready to copy</label>
+        <pre id="linkedInOutput" tabindex="0">Your LinkedIn About will appear here.</pre>
+      </div>
+    </section>
+
+    <section id="interviewPanel" class="panel rewrite-panel">
+      <div class="rewrite-head">
+        <div>
+          <p class="eyebrow dark">Premium feature</p>
+          <h3>Interview prep for this role</h3>
+          <p class="section-note">Likely questions plus answer hints based on your real resume experience.</p>
+        </div>
+        <span id="interviewPremiumTag" class="rewrite-tag locked">Locked</span>
+      </div>
+
+      <div id="interviewLocked" class="rewrite-locked">
+        <p>Unlock premium to get role-specific interview questions and answer talking points.</p>
+        <button type="button" id="interviewUnlockBtn" class="btn-secondary">Unlock premium — $4.99</button>
+      </div>
+
+      <div id="interviewTools" hidden>
+        <div class="actions">
+          <button type="button" id="interviewBtn" class="btn-primary">Generate interview prep</button>
+          <button type="button" id="copyInterviewBtn" class="btn-secondary" style="display: none;">Copy prep</button>
+          <button type="button" id="downloadInterviewBtn" class="btn-secondary" style="display: none;">Download .txt</button>
+        </div>
+        <p id="interviewStatus" class="fine-print"></p>
+        <pre id="interviewOutput" tabindex="0">Interview questions and hints will appear here.</pre>
       </div>
     </section>
 
