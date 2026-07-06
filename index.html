@@ -17,53 +17,85 @@
   <meta property="og:description" content="Professional resume feedback in minutes. Free score, premium full report." />
   <meta property="og:url" content="https://resume.motechco.ca/index.html" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://backendaianalysers.onrender.com" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="phase4.css" />
 </head>
-<body class="analyzer-page classic-layout">
-  <header class="simple-header">
-    <a class="brand" href="landing.html">MoTechCo Resume Analyzer</a>
-    <div class="header-meta">
-      <span id="premiumBadge" class="status-pill" hidden title="Full report and job-tailored rewrite are unlocked on this device.">Premium unlocked</span>
+<body class="analyzer-page">
+  <nav class="top-nav analyzer-nav">
+    <a class="brand" href="landing.html" title="Back to MoTechCo home"><span class="brand-mark">M</span> MoTechCo <span class="brand-sparkle" aria-hidden="true">✨</span></a>
+    <div class="nav-links">
+      <span id="premiumBadge" class="status-pill" hidden title="Full report and application kit unlocked on this device.">Premium unlocked</span>
+      <a href="landing.html" class="nav-home-link">← Home</a>
+      <a href="index.html" class="active">Analyzer</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="for-coaches.html">For coaches</a>
     </div>
-  </header>
+  </nav>
 
-  <main class="page-main classic-main">
-    <p class="intro-copy">Upload a PDF or Word resume. We extract the text, analyze it with Gemini, and show structured feedback.</p>
+  <div class="analyzer-home-bar">
+    <a href="landing.html" class="analyzer-home-link">← Back to MoTechCo home</a>
+    <span class="analyzer-home-label">Resume Analyzer</span>
+  </div>
 
-    <section class="panel">
-      <label class="field-label" for="jobDescription">Job posting — paste here</label>
-      <p class="paste-help">Click inside the box below, then press <strong>Ctrl+V</strong> (or long-press → Paste on phone). Paste the full job ad, not just the job title.</p>
-      <textarea id="jobDescription" class="paste-field" rows="6" placeholder="Example: We are hiring an AI Data Annotator. Responsibilities include... Required skills: attention to detail, English literacy..."></textarea>
-      <p id="jobDescHint" class="fine-print">Characters: <span id="jobCharCount">0</span> (need at least 40 for tailored rewrite)</p>
+  <div class="flow-steps" aria-label="Analysis steps">
+    <div class="flow-step active" id="flowStep1"><span>1</span> Paste job</div>
+    <div class="flow-step" id="flowStep2"><span>2</span> Upload resume</div>
+    <div class="flow-step" id="flowStep3"><span>3</span> Get score</div>
+  </div>
+
+  <main class="page-main">
+    <div class="demo-banner">
+      <p>New here? Preview a sample <strong>72/100</strong> report — no upload needed.</p>
+      <button type="button" id="demoReportBtn" class="btn-secondary">Try sample report</button>
+    </div>
+
+    <section class="panel upload-hero-panel">
+      <h2 style="margin-top:0">Paste the job. Upload your resume. See where you stand.</h2>
+      <p class="section-note">No signup wall — just honest feedback on whether your resume fits the posting you care about.</p>
+
+      <label class="field-label" for="jobDescription">Job posting</label>
+      <p class="paste-help">Paste the full ad — not just the title — so keyword match is accurate.</p>
+      <textarea id="jobDescription" class="paste-field" rows="5" placeholder="Example: We are hiring an AI Data Annotator in Toronto. Responsibilities include... Required: attention to detail, English literacy, driver's license..."></textarea>
+      <p id="jobDescHint" class="fine-print">Characters: <span id="jobCharCount">0</span> (40+ recommended for tailored rewrite)</p>
 
       <form id="uploadForm" enctype="multipart/form-data">
         <label class="field-label" for="resume">Resume file</label>
-        <div class="file-drop">
+        <div class="file-drop file-drop-modern">
           <input type="file" id="resume" name="resume" accept=".pdf,.docx" required />
+          <p class="fine-print" style="margin:10px 0 0">PDF or DOCX · Max one file</p>
         </div>
         <div class="actions">
-          <button type="submit" id="submitBtn" class="btn-primary">Upload &amp; Analyze</button>
+          <button type="submit" id="submitBtn" class="btn-primary">Upload &amp; analyze</button>
           <button type="button" id="analyzeBtn" class="btn-secondary" style="display: none;">Run again</button>
         </div>
       </form>
 
       <div id="loading" class="loading">Working...</div>
+      <div id="loadingProgress" class="loading-progress"><div class="loading-progress-bar"></div></div>
       <p id="loadingNote" class="loading-note"></p>
     </section>
 
-    <section class="panel">
-      <h2>Parsed Text</h2>
-      <p class="section-note">Read-only — extracted from your uploaded file. To paste a job ad, use the <strong>Job posting</strong> box at the top.</p>
+    <details class="panel parsed-details">
+      <summary>Parsed resume text (optional)</summary>
+      <p class="section-note">Extracted from your file — read-only. Most people can skip this.</p>
       <pre id="output" class="selectable-pre">Upload a resume to see extracted text here.</pre>
-    </section>
+    </details>
 
-    <section class="panel">
+    <section id="resultsZone" class="panel results-zone" hidden>
       <div class="panel-head-row">
         <div>
-          <h2>AI Analysis</h2>
-          <p class="section-note">Score, strengths, weaknesses, and suggestions from Gemini.</p>
+          <h2>Your results</h2>
+          <p class="section-note">Score, strengths, and what unlocks with the full application kit.</p>
         </div>
       </div>
+
+      <div id="demoSampleBadge" class="demo-sample-badge" hidden>Sample report — upload your resume for a real score</div>
+
       <div id="scoreHero" class="score-hero" hidden aria-live="polite">
         <div class="score-hero-ring" id="scoreHeroRing"><span id="scoreHeroValue">--</span></div>
         <div>
@@ -71,11 +103,20 @@
           <p class="score-hero-note">Out of 100 — based on your uploaded text</p>
         </div>
       </div>
+
       <pre id="analysisOutput" class="selectable-pre">Your AI feedback will appear here after you upload a resume.</pre>
+
+      <div id="previewBlurWrap" class="preview-blur-wrap" hidden>
+        <div id="previewBlurContent" class="preview-blur-content"></div>
+        <div class="preview-blur-overlay">
+          <p>Full weaknesses, keywords &amp; formatting fixes</p>
+          <button type="button" id="blurUnlockBtn" class="btn-primary">Unlock application kit — <span id="blurUnlockPrice">$4.99</span></button>
+        </div>
+      </div>
 
       <div id="freeLeadPanel" class="lead-capture" hidden>
         <p class="lead-capture-title">Email my free score</p>
-        <p class="section-note">Get your score and top strengths in your inbox — plus a link to unlock the full application kit when you are ready.</p>
+        <p class="section-note">Get your score and top strengths in your inbox — plus a link to unlock when you are ready.</p>
         <div class="email-row">
           <input id="freeLeadEmail" type="email" placeholder="you@example.com" autocomplete="email" />
           <button type="button" id="freeLeadBtn" class="btn-secondary">Send my score</button>
@@ -88,26 +129,24 @@
         <ol>
           <li>Wait <strong>2–3 minutes</strong> without clicking anything.</li>
           <li>Click <strong>Run again</strong> once.</li>
-          <li>If it keeps failing: on Render, replace <strong>GEMINI_API_KEY</strong> with a new key from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a> (create in a new project).</li>
-          <li>For production: enable billing on Google AI Studio for higher limits.</li>
+          <li>If it keeps failing: replace <strong>GEMINI_API_KEY</strong> on Render with a new key from <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.</li>
         </ol>
       </div>
 
       <div id="paywallBox" class="paywall-inline" hidden>
         <p class="paywall-title">Unlock the full application kit</p>
-        <p class="section-note">One payment unlocks everything: full report, job-match keywords, tailored resume rewrite, cover letter, and export tools.</p>
+        <p class="section-note">One payment unlocks everything below — rewrite, cover letter, LinkedIn, interview prep, and export.</p>
         <ul class="paywall-list">
           <li>Weaknesses + ATS keyword gaps</li>
           <li>Job-tailored resume rewrite</li>
-          <li>Job-tailored cover letter</li>
-          <li>LinkedIn About optimizer</li>
+          <li>Cover letter + LinkedIn About</li>
           <li>Interview question prep</li>
           <li>Download, print, email &amp; share</li>
         </ul>
         <p class="price-tag compact"><span id="paywallPrice">$4.99</span> <span>one-time · 30 days on this device</span></p>
         <button type="button" id="unlockBtn" class="btn-primary">Unlock application kit — <span id="unlockBtnPrice">$4.99</span></button>
         <p id="paymentStatus" class="payment-status" hidden></p>
-        <p class="fine-print">Secure checkout via Stripe · By paying you agree to our <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a></p>
+        <p class="fine-print">Secure checkout via Stripe · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a></p>
       </div>
     </section>
 
@@ -126,26 +165,33 @@
       </div>
     </section>
 
-    <section id="rewritePanel" class="panel rewrite-panel">
+    <section id="kitSection" class="panel kit-section">
+      <div class="kit-intro">
+        <p class="eyebrow dark">Application kit</p>
+        <h2>Everything for one job application</h2>
+        <p class="section-note">Unlock once to generate all of these for the job posting you pasted above.</p>
+      </div>
+      <div id="kitGrid" class="kit-grid"></div>
+      <nav class="kit-nav" aria-label="Application kit tools">
+        <button type="button" class="kit-tab active" data-kit="rewrite">Resume rewrite</button>
+        <button type="button" class="kit-tab" data-kit="cover">Cover letter</button>
+        <button type="button" class="kit-tab" data-kit="linkedin">LinkedIn About</button>
+        <button type="button" class="kit-tab" data-kit="interview">Interview prep</button>
+      </nav>
+    </section>
+
+    <section id="rewritePanel" class="panel rewrite-panel kit-panel-target">
       <div class="rewrite-head">
         <div>
-          <p class="eyebrow dark">Premium feature</p>
-          <h3>Tailor your resume to the job posting</h3>
-          <p class="section-note">Generate a rewritten resume aligned to the job description above. Copy it, paste into Word, and edit before applying.</p>
+          <h3>Tailor your resume to the job</h3>
+          <p class="section-note">Rewritten using only your real experience — no fake jobs or skills.</p>
         </div>
         <span id="rewritePremiumTag" class="rewrite-tag locked">Locked</span>
       </div>
 
-      <ol class="rewrite-steps">
-        <li>Paste the job description at the top of this page.</li>
-        <li>Upload your current resume.</li>
-        <li>Click <strong>Generate tailored resume</strong>.</li>
-        <li>Use <strong>Copy resume text</strong> and paste into your document.</li>
-      </ol>
-
       <div id="rewriteLocked" class="rewrite-locked">
-        <p>Unlock premium to generate a job-tailored rewrite using your real experience only — no fake jobs or skills added.</p>
-        <button type="button" id="rewriteUnlockBtn" class="btn-secondary">Unlock premium — $4.99</button>
+        <p>Unlock premium to generate a job-tailored rewrite.</p>
+        <button type="button" id="rewriteUnlockBtn" class="btn-secondary">Unlock — $4.99</button>
       </div>
 
       <div id="rewriteTools" hidden>
@@ -155,25 +201,24 @@
           <button type="button" id="downloadRewriteBtn" class="btn-secondary" style="display: none;">Download .txt</button>
         </div>
         <p id="rewriteStatus" class="fine-print"></p>
-        <label class="field-label" for="rewriteOutput">Rewritten resume — ready to copy</label>
+        <label class="field-label" for="rewriteOutput">Rewritten resume</label>
         <pre id="rewriteOutput" tabindex="0">Your tailored resume will appear here after you generate it.</pre>
-        <p class="fine-print rewrite-disclaimer">AI rewrite uses only facts from your uploaded resume. Review everything before applying. See <a href="terms.html">Terms</a>.</p>
+        <p class="fine-print rewrite-disclaimer">Review everything before applying. See <a href="terms.html">Terms</a>.</p>
       </div>
     </section>
 
-    <section id="coverLetterPanel" class="panel rewrite-panel">
+    <section id="coverLetterPanel" class="panel rewrite-panel kit-panel-target">
       <div class="rewrite-head">
         <div>
-          <p class="eyebrow dark">Premium feature</p>
-          <h3>Generate a cover letter for this job</h3>
-          <p class="section-note">Uses your resume facts and the job posting above. Copy into your application or email.</p>
+          <h3>Cover letter for this job</h3>
+          <p class="section-note">From your resume facts and the job posting above.</p>
         </div>
         <span id="coverLetterPremiumTag" class="rewrite-tag locked">Locked</span>
       </div>
 
       <div id="coverLetterLocked" class="rewrite-locked">
-        <p>Unlock premium to generate a tailored cover letter — included with the same one-time payment.</p>
-        <button type="button" id="coverLetterUnlockBtn" class="btn-secondary">Unlock premium — $4.99</button>
+        <p>Unlock premium to generate a tailored cover letter.</p>
+        <button type="button" id="coverLetterUnlockBtn" class="btn-secondary">Unlock — $4.99</button>
       </div>
 
       <div id="coverLetterTools" hidden>
@@ -183,54 +228,51 @@
           <button type="button" id="downloadCoverLetterBtn" class="btn-secondary" style="display: none;">Download .txt</button>
         </div>
         <p id="coverLetterStatus" class="fine-print"></p>
-        <label class="field-label" for="coverLetterOutput">Cover letter — ready to copy</label>
+        <label class="field-label" for="coverLetterOutput">Cover letter</label>
         <pre id="coverLetterOutput" tabindex="0">Your cover letter will appear here after you generate it.</pre>
-        <p class="fine-print rewrite-disclaimer">Review and add your contact details before sending. See <a href="terms.html">Terms</a>.</p>
       </div>
     </section>
 
-    <section id="linkedInPanel" class="panel rewrite-panel">
+    <section id="linkedInPanel" class="panel rewrite-panel kit-panel-target">
       <div class="rewrite-head">
         <div>
-          <p class="eyebrow dark">Premium feature</p>
-          <h3>Optimize your LinkedIn About section</h3>
-          <p class="section-note">Tailored to the job posting above. Optionally paste your current About text to improve it.</p>
+          <h3>LinkedIn About optimizer</h3>
+          <p class="section-note">Aligned to the role. Optionally paste your current About text.</p>
         </div>
         <span id="linkedInPremiumTag" class="rewrite-tag locked">Locked</span>
       </div>
 
       <div id="linkedInLocked" class="rewrite-locked">
-        <p>Unlock premium to generate a job-aligned LinkedIn About section from your resume.</p>
-        <button type="button" id="linkedInUnlockBtn" class="btn-secondary">Unlock premium — $4.99</button>
+        <p>Unlock premium to optimize your LinkedIn About section.</p>
+        <button type="button" id="linkedInUnlockBtn" class="btn-secondary">Unlock — $4.99</button>
       </div>
 
       <div id="linkedInTools" hidden>
         <label class="field-label" for="linkedInInput">Current LinkedIn About (optional)</label>
-        <textarea id="linkedInInput" class="paste-field" rows="4" placeholder="Paste your current About section, or leave blank to generate from your resume."></textarea>
+        <textarea id="linkedInInput" class="paste-field" rows="4" placeholder="Paste your current About, or leave blank."></textarea>
         <div class="actions">
           <button type="button" id="linkedInBtn" class="btn-primary">Optimize LinkedIn About</button>
           <button type="button" id="copyLinkedInBtn" class="btn-secondary" style="display: none;">Copy About</button>
           <button type="button" id="downloadLinkedInBtn" class="btn-secondary" style="display: none;">Download .txt</button>
         </div>
         <p id="linkedInStatus" class="fine-print"></p>
-        <label class="field-label" for="linkedInOutput">Optimized About — ready to copy</label>
+        <label class="field-label" for="linkedInOutput">Optimized About</label>
         <pre id="linkedInOutput" tabindex="0">Your LinkedIn About will appear here.</pre>
       </div>
     </section>
 
-    <section id="interviewPanel" class="panel rewrite-panel">
+    <section id="interviewPanel" class="panel rewrite-panel kit-panel-target">
       <div class="rewrite-head">
         <div>
-          <p class="eyebrow dark">Premium feature</p>
-          <h3>Interview prep for this role</h3>
-          <p class="section-note">Likely questions plus answer hints based on your real resume experience.</p>
+          <h3>Interview prep</h3>
+          <p class="section-note">Likely questions plus answer hints from your real experience.</p>
         </div>
         <span id="interviewPremiumTag" class="rewrite-tag locked">Locked</span>
       </div>
 
       <div id="interviewLocked" class="rewrite-locked">
-        <p>Unlock premium to get role-specific interview questions and answer talking points.</p>
-        <button type="button" id="interviewUnlockBtn" class="btn-secondary">Unlock premium — $4.99</button>
+        <p>Unlock premium for role-specific interview questions.</p>
+        <button type="button" id="interviewUnlockBtn" class="btn-secondary">Unlock — $4.99</button>
       </div>
 
       <div id="interviewTools" hidden>
@@ -246,10 +288,13 @@
 
     <section id="sharePanel" class="panel" hidden>
       <h3>Export &amp; share</h3>
+      <p class="section-note">Download everything you generated for this job in one file, or print to PDF.</p>
       <div class="share-actions">
+        <button type="button" id="downloadApplicationPackBtn" class="btn-primary">Download application kit</button>
+        <button type="button" id="printApplicationPackBtn" class="btn-secondary">Print kit as PDF</button>
         <button type="button" id="downloadCardBtn" class="btn-secondary">Score card</button>
-        <button type="button" id="downloadReportBtn" class="btn-secondary">Download report</button>
-        <button type="button" id="printReportBtn" class="btn-secondary">Print / PDF</button>
+        <button type="button" id="downloadReportBtn" class="btn-secondary">Report only</button>
+        <button type="button" id="printReportBtn" class="btn-secondary">Print report</button>
         <button type="button" id="copyShareBtn" class="btn-secondary">Copy caption</button>
         <button type="button" id="linkedinShareBtn" class="btn-secondary">LinkedIn</button>
         <button type="button" id="twitterShareBtn" class="btn-secondary">X</button>
@@ -268,18 +313,13 @@
 
     <section id="contactPanel" class="panel contact-panel">
       <h3>Need help?</h3>
-      <p id="contactHelpText" class="section-note">Questions about your report, premium access, payment, or a custom review?</p>
+      <p id="contactHelpText" class="section-note">Questions about your report, premium access, or payment?</p>
       <p><a id="contactEmailLink" href="mailto:mowebsiteco@gmail.com?subject=MoTechCo%20Resume%20Analyzer%20help">mowebsiteco@gmail.com</a></p>
     </section>
 
     <section class="panel referral-panel">
-      <h3>Share MoTechCo with a friend</h3>
-      <p class="section-note">Your friend gets <strong>24 hours of premium free</strong> when they open your link. You help them; they get the full application kit to try.</p>
-      <ol class="referral-steps">
-        <li>Click <strong>Copy link</strong> below.</li>
-        <li>Send it by text, WhatsApp, or email.</li>
-        <li>When they open your link, premium unlocks automatically on their device.</li>
-      </ol>
+      <h3>Share with a friend</h3>
+      <p class="section-note">Your friend gets <strong>24 hours of premium free</strong> when they open your link.</p>
       <div class="referral-row">
         <input id="referralLink" type="text" readonly aria-label="Your referral link" />
         <button type="button" id="copyReferralBtn" class="btn-secondary">Copy link</button>
@@ -294,9 +334,10 @@
   </div>
 
   <footer class="site-footer">
-    <p>© 2026 MoTechCo · <a href="landing.html">Home</a> · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></p>
+    <p>© 2026 MoTechCo · <a href="landing.html">← Back to home</a> · <a href="about.html">About</a> · <a href="contact.html">Contact</a> · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></p>
   </footer>
 
+  <script src="demo.js"></script>
   <script src="share.js"></script>
   <script src="script.js"></script>
 </body>

@@ -10,100 +10,186 @@
     gtag("js", new Date());
     gtag("config", "G-14JS9PFD1C");
   </script>
-  <title>MoTechCo | Resume Analyzer</title>
-  <meta name="description" content="MoTechCo Resume Analyzer gives job seekers a clear score, ATS keyword feedback, and optional job-match insights." />
+  <title>MoTechCo | AI Resume Analyzer — Score, ATS & Application Kit</title>
+  <meta name="description" content="Free resume score in minutes. Paste the job ad for keyword match. Unlock rewrite, cover letter, LinkedIn, and interview prep for one application." />
   <link rel="canonical" href="https://resume.motechco.ca/" />
   <meta property="og:title" content="MoTechCo Resume Analyzer" />
-  <meta property="og:description" content="Professional resume feedback in minutes. Free score, premium full report." />
+  <meta property="og:description" content="See your score free. Unlock the full application kit for $6.99." />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="phase4.css" />
 </head>
 <body class="landing-page">
-  <nav class="top-nav">
-    <a class="brand" href="landing.html"><span class="brand-mark">M</span> MoTechCo</a>
+  <nav class="top-nav lilac-nav">
+    <a class="brand" href="landing.html"><span class="brand-mark">M</span> MoTechCo <span class="brand-sparkle" aria-hidden="true">✨</span></a>
     <div class="nav-links">
       <a href="landing.html" class="active">Home</a>
       <a href="index.html">Analyzer</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
       <a href="for-coaches.html">For coaches</a>
     </div>
   </nav>
 
-  <section class="hero landing-hero">
-    <p class="eyebrow">MoTechCo · Resume Analyzer</p>
-    <h1>A sharper resume before your next application</h1>
-    <p class="hero-copy">Upload your resume, optionally add a job posting, and get structured feedback on score, strengths, keyword gaps, and formatting — without rewriting everything from scratch.</p>
-    <div class="hero-actions">
-      <a href="index.html" class="cta-btn btn-primary primary-cta">Analyze my resume — free</a>
-      <a href="#pricing" class="cta-btn btn-secondary secondary-cta">See pricing</a>
+  <section class="hero-lilac-wrap">
+  <section class="hero-split">
+    <div class="hero-split-copy">
+      <p class="eyebrow hero-eyebrow-light">Resume · ATS · Application kit</p>
+      <h1>You've sent enough applications into the void</h1>
+      <p class="hero-copy hero-copy-light">Paste the job. See what's missing. Fix it before you hit submit — score free, full application kit when you're ready. No account. No fake experience added. Ever.</p>
+      <div class="hero-actions">
+        <a href="index.html" class="cta-btn btn-primary primary-cta hero-cta-light">Start resume analysis</a>
+        <a href="index.html?demo=1" class="cta-btn btn-secondary secondary-cta hero-cta-ghost">See sample report</a>
+      </div>
+      <p class="trust-line hero-trust-light">PDF &amp; DOCX · Free score · Full kit from <span data-price-label>$6.99</span> — not another monthly bill</p>
     </div>
-    <p class="trust-line">No account required · PDF and DOCX supported · Resume text is processed, not stored</p>
+
+    <aside class="demo-card" aria-label="Sample report preview">
+      <p class="demo-card-label">Live preview — sample report</p>
+      <div class="demo-score-row">
+        <div class="demo-ring" aria-hidden="true"><span>72</span></div>
+        <div>
+          <strong>Resume score</strong>
+          <p class="section-note" style="margin:4px 0 0">6 improvements found · job match available</p>
+        </div>
+      </div>
+      <p class="section-note" style="margin:0 0 8px"><strong>Strengths detected</strong></p>
+      <div class="demo-chip-row">
+        <span class="demo-chip">Relevant QA experience</span>
+        <span class="demo-chip">Remote collaboration</span>
+        <span class="demo-chip">ATS-friendly skills</span>
+      </div>
+      <p class="section-note" style="margin:14px 0 8px"><strong>Missing for this job</strong></p>
+      <div class="demo-chip-row">
+        <span class="demo-chip missing">Toronto / relocation</span>
+        <span class="demo-chip missing">Driver's license</span>
+        <span class="demo-chip missing">+4 more locked</span>
+      </div>
+    </aside>
+  </section>
+  </section>
+
+  <section class="why-section">
+    <h2>Why MoTechCo?</h2>
+    <div class="why-grid">
+      <article class="why-card">
+        <span class="why-icon" aria-hidden="true">✨</span>
+        <h3>Resume feedback that respects you</h3>
+        <p>Clear score, strengths, and three fixes you can try tonight — written for humans, not robots.</p>
+      </article>
+      <article class="why-card">
+        <span class="why-icon" aria-hidden="true">💜</span>
+        <h3>Beautiful lilac experience</h3>
+        <p>Job searching is stressful enough. We kept the calm purple look you liked — with more room to breathe.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="before-after-section">
+    <h2>What changes when you match the job posting</h2>
+    <p class="section-note before-after-intro">Real example from a sample analysis — your numbers will differ.</p>
+    <div class="before-after-grid">
+      <article class="before-after-card before">
+        <p class="ba-label">Before</p>
+        <p class="ba-score">Score <strong>58</strong>/100</p>
+        <ul>
+          <li>Generic summary — doesn't mention the role</li>
+          <li>Missing keywords: Toronto, relocation, driver's license</li>
+          <li>Bullets describe tasks, not outcomes</li>
+        </ul>
+      </article>
+      <article class="before-after-card after">
+        <p class="ba-label">After fixes + kit unlock</p>
+        <p class="ba-score">Score <strong>76</strong>/100</p>
+        <ul>
+          <li>Summary leads with role fit for the posting</li>
+          <li>Honest keywords added where they apply</li>
+          <li>Rewrite + cover letter ready to paste</li>
+        </ul>
+      </article>
+    </div>
+    <p class="proof-note">Illustrative — not a guarantee of interviews or offers.</p>
+  </section>
+
+  <section class="comparison-table-wrap">
+    <h2 style="text-align:center;margin-bottom:18px">MoTechCo vs typical resume tools</h2>
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Big subscription tools</th>
+          <th class="highlight-col">MoTechCo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Free score</td>
+          <td>Limited trial</td>
+          <td class="highlight-col">Yes — no account</td>
+        </tr>
+        <tr>
+          <td>Job-specific keywords</td>
+          <td>Often extra tier</td>
+          <td class="highlight-col">Paste any job ad</td>
+        </tr>
+        <tr>
+          <td>Resume + letter + LinkedIn + interview</td>
+          <td>Separate products</td>
+          <td class="highlight-col">One application kit</td>
+        </tr>
+        <tr>
+          <td>Price</td>
+          <td>$20–40/month</td>
+          <td class="highlight-col"><span data-price-label>$6.99</span> one-time <span class="price-compare" data-compare-label></span></td>
+        </tr>
+        <tr>
+          <td>Invents fake jobs?</td>
+          <td>Varies</td>
+          <td class="highlight-col">Never — resume facts only</td>
+        </tr>
+      </tbody>
+    </table>
   </section>
 
   <section class="how-section">
     <h2>How it works</h2>
     <div class="how-grid">
       <article class="how-card">
-        <h3>Upload</h3>
-        <p>Drop in your current resume. We extract the text and review what is actually on the page.</p>
+        <h3>1 · Paste the job</h3>
+        <p>Copy the full posting — not just the title — so keyword match is accurate.</p>
       </article>
       <article class="how-card">
-        <h3>Review</h3>
-        <p>See your score, strengths, and what is missing for ATS and role fit. Premium unlocks the full breakdown.</p>
+        <h3>2 · Upload resume</h3>
+        <p>PDF or Word. Get your score and strengths in about a minute.</p>
       </article>
       <article class="how-card">
-        <h3>Improve</h3>
-        <p>Download, print, email, or share your report — then update your resume with confidence.</p>
+        <h3>3 · Unlock the kit</h3>
+        <p>Full report plus rewrite, cover letter, LinkedIn About, and interview prep.</p>
       </article>
     </div>
   </section>
 
   <section class="features landing-features">
-    <h2>Why people use it</h2>
+    <h2>What's in the application kit</h2>
     <div class="feature-grid">
       <article class="feature-box">
-        <h3>Clear score</h3>
-        <p>Start with a simple overall score and the strongest parts of your resume.</p>
+        <h3>📊 Full ATS report</h3>
+        <p>Weaknesses, keyword gaps, formatting fixes, and job-match score.</p>
       </article>
       <article class="feature-box">
-        <h3>Job match</h3>
-        <p>Paste a posting to see matched and missing keywords for that specific role.</p>
+        <h3>📄 Resume rewrite</h3>
+        <p>Tailored to the posting using only your real experience.</p>
       </article>
       <article class="feature-box">
-        <h3>Application kit</h3>
-        <p>One unlock: full report, tailored resume rewrite, cover letter, LinkedIn About, and interview prep.</p>
+        <h3>✉️ Cover letter</h3>
+        <p>Ready to copy into your application or email.</p>
       </article>
       <article class="feature-box">
-        <h3>Honest AI</h3>
-        <p>We analyze what is on your resume — no fake jobs, skills, or credentials added.</p>
-      </article>
-    </div>
-  </section>
-
-  <section class="before-after">
-    <h2>What changes after you unlock</h2>
-    <div class="compare-grid">
-      <article class="compare-card">
-        <h3>Free preview</h3>
-        <ul>
-          <li>Overall score /100</li>
-          <li>Top 3 strengths</li>
-          <li>Count of hidden issues</li>
-          <li class="compare-muted">Weaknesses locked</li>
-          <li class="compare-muted">Keyword gaps locked</li>
-        </ul>
-      </article>
-      <article class="compare-card compare-highlight">
-        <h3>Application kit</h3>
-        <ul>
-          <li>Full weaknesses breakdown</li>
-          <li>ATS keyword gaps + job match</li>
-          <li>Tailored resume rewrite</li>
-          <li>Tailored cover letter</li>
-          <li>Download, print, email &amp; share</li>
-        </ul>
+        <h3>💼 LinkedIn + 🎤 Interview</h3>
+        <p>About section optimizer and role-specific question prep.</p>
       </article>
     </div>
   </section>
@@ -112,15 +198,15 @@
     <h2>Built for real job searches</h2>
     <div class="proof-grid">
       <blockquote>
-        <p>“Pasting the job description showed keywords I completely missed — fixed my resume in one evening.”</p>
+        <p>"Pasting the job description showed keywords I completely missed — fixed my resume in one evening."</p>
         <cite>— Job seeker, tech role</cite>
       </blockquote>
       <blockquote>
-        <p>“Free score first, then paid for the rewrite. Cheaper than a career coach for one application.”</p>
+        <p>"Free score first, then paid for the rewrite. Cheaper than a career coach for one application."</p>
         <cite>— Recent graduate</cite>
       </blockquote>
     </div>
-    <p class="proof-note">Testimonials are illustrative examples of typical use — not guaranteed outcomes.</p>
+    <p class="proof-note">Illustrative examples — not guaranteed outcomes.</p>
   </section>
 
   <section class="seo-guides landing-guides">
@@ -140,22 +226,22 @@
         <h3>Free</h3>
         <p class="price">$0</p>
         <ul>
-          <li>Overall score</li>
-          <li>Top strengths preview</li>
-          <li>Resume text extraction</li>
+          <li>Overall score /100</li>
+          <li>Top 3 strengths</li>
+          <li>3 quick fixes to try first</li>
         </ul>
         <a href="index.html" class="cta-btn btn-secondary secondary-cta">Start free</a>
       </article>
       <article class="pricing-card featured">
+        <p class="launch-badge">Launch price</p>
         <h3>Application kit</h3>
-        <p class="price"><span data-price-label>$4.99</span></p>
+        <p class="price"><span data-price-label>$6.99</span> <span class="price-strike" data-compare-label></span></p>
+        <p class="pricing-tagline" data-launch-note>One job. One payment. No subscription.</p>
         <ul>
           <li>Full report + job-match keywords</li>
-          <li>Tailored resume rewrite</li>
-          <li>Tailored cover letter</li>
-          <li>LinkedIn About optimizer</li>
-          <li>Interview question prep</li>
-          <li>Download, print, email &amp; share</li>
+          <li>Resume rewrite + cover letter</li>
+          <li>LinkedIn About + interview prep</li>
+          <li>Download application kit as PDF</li>
         </ul>
         <a href="index.html" class="cta-btn btn-primary primary-cta">Unlock application kit</a>
       </article>
@@ -166,33 +252,30 @@
     <h2>Common questions</h2>
     <div class="faq-grid">
       <article class="faq-item">
-        <h3>Is the free score really free?</h3>
-        <p>Yes. Upload your resume, get a score and strengths preview. No account required. Premium is optional.</p>
+        <h3>Can I try before uploading?</h3>
+        <p>Yes. Click <strong>See sample report</strong> on the analyzer to preview a 72/100 example.</p>
       </article>
       <article class="faq-item">
         <h3>Do you store my resume?</h3>
-        <p>We extract text to analyze it. Files are not permanently stored on our servers after processing.</p>
+        <p>Text is processed for analysis, not permanently stored on our servers.</p>
       </article>
       <article class="faq-item">
-        <h3>Will the rewrite invent fake jobs?</h3>
-        <p>No. Rewrites and cover letters use only facts from your uploaded resume — no fabricated employers or skills.</p>
+        <h3>Will AI invent fake jobs?</h3>
+        <p>No. All rewrites and letters use only facts from your uploaded resume.</p>
       </article>
       <article class="faq-item">
-        <h3>Can I get a refund?</h3>
-        <p>Email <a href="mailto:mowebsiteco@gmail.com">mowebsiteco@gmail.com</a> for billing issues or if premium did not unlock.</p>
+        <h3>Refunds?</h3>
+        <p>Email <a href="mailto:mowebsiteco@gmail.com">mowebsiteco@gmail.com</a> for billing issues.</p>
       </article>
     </div>
-  </section>
-
-  <section class="seo-copy">
-    <h2>Honest feedback, not hype</h2>
-    <p>MoTechCo Resume Analyzer is designed for tech, data, IT, and early-career professionals who want practical resume feedback fast. Scores are guidance based on your uploaded text — use them to improve your materials, not as a guarantee of interviews or offers.</p>
   </section>
 
   <footer class="footer site-footer landing-footer">
     <p>© 2026 MoTechCo</p>
     <p class="footer-links">
       <a href="index.html">Resume Analyzer</a> ·
+      <a href="about.html">About</a> ·
+      <a href="contact.html">Contact</a> ·
       <a href="for-coaches.html">For coaches</a> ·
       <a href="privacy.html">Privacy</a> ·
       <a href="terms.html">Terms</a>

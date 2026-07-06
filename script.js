@@ -86,7 +86,20 @@ const unlockBtnPrice = document.getElementById("unlockBtnPrice");
 const stickyUnlockBar = document.getElementById("stickyUnlockBar");
 const stickyUnlockBtn = document.getElementById("stickyUnlockBtn");
 const stickyUnlockText = document.getElementById("stickyUnlockText");
-const stickyUnlockPrice = document.getElementById("stickyUnlockPrice");
+const downloadApplicationPackBtn = document.getElementById("downloadApplicationPackBtn");
+const printApplicationPackBtn = document.getElementById("printApplicationPackBtn");
+const resultsZone = document.getElementById("resultsZone");
+const previewBlurWrap = document.getElementById("previewBlurWrap");
+const previewBlurContent = document.getElementById("previewBlurContent");
+const blurUnlockBtn = document.getElementById("blurUnlockBtn");
+const blurUnlockPrice = document.getElementById("blurUnlockPrice");
+const demoReportBtn = document.getElementById("demoReportBtn");
+const loadingProgress = document.getElementById("loadingProgress");
+const flowStep1 = document.getElementById("flowStep1");
+const flowStep2 = document.getElementById("flowStep2");
+const flowStep3 = document.getElementById("flowStep3");
+const kitGrid = document.getElementById("kitGrid");
+const resumeInput = document.getElementById("resume");
 
 const API_BASE = "https://backendaianalysers.onrender.com";
 const SITE_URL = "https://resume.motechco.ca";
@@ -107,6 +120,31 @@ const COLD_START_NOTE =
 
 const ANALYZE_TIMEOUT_MS = 90000;
 
+let loadingMessageTimers = [];
+
+function clearLoadingMessageTimer() {
+  loadingMessageTimers.forEach((timer) => clearTimeout(timer));
+  loadingMessageTimers = [];
+}
+
+function scheduleColdStartMessages() {
+  clearLoadingMessageTimer();
+  loadingMessageTimers.push(
+    setTimeout(() => {
+      if (loading.style.display === "none") return;
+      loading.textContent = "Still working — server may be waking up...";
+      loadingNote.textContent =
+        "Render free tier can take 30–60 seconds after idle. Please keep this tab open.";
+    }, 15000)
+  );
+  loadingMessageTimers.push(
+    setTimeout(() => {
+      if (loading.style.display === "none") return;
+      loading.textContent = "Almost there — analyzing with AI...";
+    }, 35000)
+  );
+}
+
 async function fetchWithTimeout(url, options, timeoutMs = ANALYZE_TIMEOUT_MS) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -122,8 +160,127 @@ let latestRewrite = "";
 let latestCoverLetter = "";
 let latestLinkedInAbout = "";
 let latestInterviewPrep = "";
-let pricing = { priceLabel: "$4.99", stripeConfigured: false };
+let pricing = {
+  priceLabel: "$6.99",
+  compareAtLabel: "$29/mo elsewhere",
+  launchNote: "One job. One payment. No monthly subscription.",
+  stripeConfigured: false,
+};
 let emailDeliveryEnabled = false;
+
+function setFlowStep(step) {
+  [flowStep1, flowStep2, flowStep3].forEach((el, index) => {
+    if (el) el.classList.toggle("active", index + 1 === step);
+  });
+}
+
+function updateFlowFromForm() {
+  const hasJob = Boolean(jobDescriptionInput?.value?.trim());
+  const hasFile = Boolean(resumeInput?.files?.[0]);
+  if (latestAnalysis) setFlowStep(3);
+  else if (hasFile) setFlowStep(2);
+  else if (hasJob) setFlowStep(2);
+  else setFlowStep(1);
+}
+
+function renderBlurPreview(data) {
+  if (!previewBlurWrap || !previewBlurContent) return;
+
+  const demo = window.MoTechCoDemo?.BLUR_PREVIEW;
+  const show = data && data.tier === "free" && data.locked && demo;
+  if (!show) {
+    previewBlurWrap.hidden = true;
+    return;
+  }
+
+  const weaknesses =
+    Array.isArray(data.weaknesses) && data.weaknesses.length > 0
+      ? data.weaknesses
+      : demo.weaknesses;
+  const missing =
+    Array.isArray(data.missingKeywords) && data.missingKeywords.length > 0
+      ? data.missingKeywords
+      : demo.missingKeywords;
+
+  previewBlurContent.innerHTML = `
+    <p><strong>Weaknesses</strong></p>
+    <ul>${weaknesses.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+    <p><strong>Missing keywords</strong></p>
+    <div class="demo-chip-row">${missing
+      .map((item) => `<span class="demo-chip missing">${escapeHtml(item)}</span>`)
+      .join("")}</div>
+  `;
+  previewBlurWrap.hidden = false;
+}
+
+function renderKitGrid(isPremium) {
+  if (!kitGrid) return;
+  const items = window.MoTechCoDemo?.BLUR_PREVIEW?.kitItems || [];
+  kitGrid.innerHTML = items
+    .map(
+      (item) => `
+    <article class="kit-card ${isPremium ? "" : "locked-card"}">
+      <div class="kit-card-icon">${item.icon}</div>
+      <h4>${escapeHtml(item.title)}</h4>
+      <p>${escapeHtml(item.desc)}</p>
+    </article>`
+    )
+    .join("");
+}
+
+function scrollToResults() {
+  if (resultsZone) {
+    resultsZone.hidden = false;
+    resultsZone.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+function showDemoReport() {
+  const demo = window.MoTechCoDemo;
+  if (!demo) return;
+
+  if (jobDescriptionInput) {
+    jobDescriptionInput.value = demo.SAMPLE_JOB;
+    updateJobCharCount();
+  }
+  if (output) output.textContent = demo.SAMPLE_RESUME;
+
+  setFlowStep(3);
+  updateResultsUi(demo.DEMO_ANALYSIS);
+
+  if (analyzeBtn) analyzeBtn.style.display = "none";
+  if (typeof gtag === "function") {
+    gtag("event", "demo_report_view", { score: demo.DEMO_ANALYSIS.score });
+  }
+}
+
+function setupKitTabs() {
+  const tabs = document.querySelectorAll(".kit-tab");
+  const panelMap = {
+    rewrite: rewritePanel,
+    cover: coverLetterPanel,
+    linkedin: linkedInPanel,
+    interview: interviewPanel,
+  };
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      tabs.forEach((item) => item.classList.remove("active"));
+      tab.classList.add("active");
+      const panel = panelMap[tab.dataset.kit];
+      if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+}
+
+function handleDemoFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("demo") !== "1") return;
+  showDemoReport();
+  params.delete("demo");
+  const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+  window.history.replaceState({}, "", next);
+}
 
 function escapeHtml(value) {
   return String(value)
@@ -157,6 +314,16 @@ function renderAnalysis(data, forExport = false) {
   }
 
   lines.push(...renderSections("Strengths", data.strengths || data.strengthsPreview));
+
+  if (
+    data.tier === "free" &&
+    data.locked &&
+    Array.isArray(data.quickFixesPreview) &&
+    data.quickFixesPreview.length > 0 &&
+    !forExport
+  ) {
+    lines.push(...renderSections("Fix these first (free preview)", data.quickFixesPreview));
+  }
 
   if (data.tier === "free" && data.locked && !forExport) {
     if (typeof data.issuesFound === "number" && data.issuesFound > 0) {
@@ -248,11 +415,13 @@ function setUnlockToken(token) {
 }
 
 function applyPremiumUi(sourceLabel) {
-  premiumBadge.hidden = false;
-  premiumBadge.textContent =
-    sourceLabel === "referral" ? "Referral premium unlocked" : "Premium unlocked";
-  premiumBadge.title =
-    "Full application kit unlocked on this device for up to 30 days.";
+  if (premiumBadge) {
+    premiumBadge.hidden = false;
+    premiumBadge.textContent =
+      sourceLabel === "referral" ? "Referral premium unlocked" : "Premium unlocked";
+    premiumBadge.title =
+      "Full application kit unlocked on this device for up to 30 days.";
+  }
   updatePaywallUi(true);
   updateRewriteUi(true);
   updateCoverLetterUi(true);
@@ -260,8 +429,10 @@ function applyPremiumUi(sourceLabel) {
   updateInterviewUi(true);
   if (stickyUnlockBar) stickyUnlockBar.hidden = true;
   if (freeLeadPanel) freeLeadPanel.hidden = true;
+  if (previewBlurWrap) previewBlurWrap.hidden = true;
   if (sharePanel) sharePanel.hidden = false;
   if (emailPanel) emailPanel.hidden = false;
+  if (latestAnalysis) renderKitGrid(true);
 }
 
 function updateLinkedInUi(isPremium) {
@@ -345,6 +516,9 @@ function setLoading(active, message, note) {
   loading.textContent = message || "Working...";
   loadingNote.style.display = active && note ? "block" : "none";
   if (note) loadingNote.textContent = note;
+  if (loadingProgress) loadingProgress.classList.toggle("active", active);
+  if (active) scheduleColdStartMessages();
+  else clearLoadingMessageTimer();
   submitBtn.disabled = active;
   analyzeBtn.disabled = active;
   if (unlockBtn) unlockBtn.disabled = active;
@@ -387,6 +561,75 @@ function renderJobMatchPanel(data) {
   renderKeywordChips(missingJobKeywords, data.jobMissingKeywords, "missing");
 }
 
+function buildApplicationPackText() {
+  const sections = [];
+  sections.push("MoTechCo Application Kit");
+  sections.push("https://resume.motechco.ca");
+  sections.push("Generated for your job application — review everything before sending.");
+  sections.push("");
+
+  if (latestAnalysis) {
+    sections.push("=".repeat(48));
+    sections.push("RESUME ANALYSIS REPORT");
+    sections.push("=".repeat(48));
+    sections.push(buildReportText(latestAnalysis));
+    sections.push("");
+  }
+
+  if (latestRewrite) {
+    sections.push("=".repeat(48));
+    sections.push("TAILORED RESUME");
+    sections.push("=".repeat(48));
+    sections.push(latestRewrite);
+    sections.push("");
+  }
+
+  if (latestCoverLetter) {
+    sections.push("=".repeat(48));
+    sections.push("COVER LETTER");
+    sections.push("=".repeat(48));
+    sections.push(latestCoverLetter);
+    sections.push("");
+  }
+
+  if (latestLinkedInAbout) {
+    sections.push("=".repeat(48));
+    sections.push("LINKEDIN ABOUT");
+    sections.push("=".repeat(48));
+    sections.push(latestLinkedInAbout);
+    sections.push("");
+  }
+
+  if (latestInterviewPrep) {
+    sections.push("=".repeat(48));
+    sections.push("INTERVIEW PREP");
+    sections.push("=".repeat(48));
+    sections.push(latestInterviewPrep);
+    sections.push("");
+  }
+
+  return sections.join("\n").trim();
+}
+
+function downloadApplicationPack() {
+  const text = buildApplicationPackText();
+  if (!latestAnalysis) return;
+  downloadTextFile("motechco-application-kit.txt", text);
+}
+
+function printApplicationPack() {
+  const text = buildApplicationPackText();
+  if (!text || !latestAnalysis) return;
+  const popup = window.open("", "_blank", "noopener,noreferrer,width=860,height=920");
+  if (!popup) return;
+  popup.document.write(
+    `<pre style="font-family:Segoe UI,Arial,sans-serif;white-space:pre-wrap;padding:28px;line-height:1.5;">${text.replace(/</g, "&lt;")}</pre>`
+  );
+  popup.document.close();
+  popup.focus();
+  popup.print();
+}
+
 function buildReportText(data) {
   return renderAnalysis(data, true);
 }
@@ -396,6 +639,7 @@ function syncPriceLabels() {
   if (paywallPrice) paywallPrice.textContent = label;
   if (unlockBtnPrice) unlockBtnPrice.textContent = label;
   if (stickyUnlockPrice) stickyUnlockPrice.textContent = label;
+  if (blurUnlockPrice) blurUnlockPrice.textContent = label;
 }
 
 function updateStickyUnlockBar(isPremium, data) {
@@ -472,12 +716,21 @@ function showScoreHero(score) {
 
 function updateResultsUi(data) {
   latestAnalysis = data;
+  if (resultsZone) resultsZone.hidden = false;
+
+  const demoBadge = document.getElementById("demoSampleBadge");
+  if (demoBadge) demoBadge.hidden = !data.isDemo;
+
   showScoreHero(data.score);
   analysisOutput.textContent = renderAnalysis(data);
   analyzeBtn.style.display = "inline-block";
   renderJobMatchPanel(data);
+  setFlowStep(3);
 
   const isPremium = data.tier === "premium" || data.locked === false;
+  renderKitGrid(isPremium);
+  renderBlurPreview(isPremium ? null : data);
+
   if (isPremium) applyPremiumUi(getUnlockToken().startsWith("referral_") ? "referral" : "stripe");
   else {
     updateRewriteUi(false);
@@ -493,6 +746,7 @@ function updateResultsUi(data) {
   if (!isPremium && data.tier === "free" && data.locked) {
     paywallBox.hidden = false;
   }
+  scrollToResults();
 }
 
 function isValidResumeText(text) {
@@ -943,6 +1197,13 @@ async function generateInterviewPrep() {
 
 async function saveFreeScoreEmail() {
   if (!latestAnalysis || latestAnalysis.tier !== "free") return;
+  if (latestAnalysis.isDemo) {
+    if (freeLeadStatus) {
+      freeLeadStatus.textContent =
+        "This is a sample report. Upload your real resume to email your actual score.";
+    }
+    return;
+  }
 
   const email = freeLeadEmail?.value?.trim() || "";
   if (!email) {
@@ -1007,9 +1268,13 @@ async function loadPricing() {
     const res = await fetch(`${API_BASE}/api/resume/pricing`);
     if (res.ok) pricing = await res.json();
   } catch (_) {
-    /* keep defaults */
+    /* keep defaults — also warms Render cold start */
   }
   syncPriceLabels();
+}
+
+function warmBackend() {
+  fetch(`${API_BASE}/api/resume/pricing`, { method: "GET" }).catch(() => {});
 }
 
 async function redeemReferralFromUrl() {
@@ -1080,18 +1345,26 @@ async function startCheckout() {
       "Payments are not configured on the server yet. Add your Stripe test keys on Render, redeploy, then try again.",
       true
     );
+    if (paywallBox) paywallBox.hidden = false;
     return;
   }
 
-  if (!isValidResumeText(output.textContent.trim())) {
+  const resumeText = output?.textContent?.trim() || "";
+  const readyForCheckout =
+    isValidResumeText(resumeText) ||
+    (latestAnalysis && typeof latestAnalysis.score === "number");
+
+  if (!readyForCheckout) {
     showPaymentStatus("Upload and analyze your resume first, then unlock premium.", true);
+    if (paywallBox) paywallBox.hidden = false;
     return;
   }
 
   saveResumeDraft();
 
-  unlockBtn.disabled = true;
-  unlockBtn.textContent = "Redirecting to secure checkout...";
+  if (unlockBtn) unlockBtn.disabled = true;
+  if (blurUnlockBtn) blurUnlockBtn.disabled = true;
+  if (stickyUnlockBtn) stickyUnlockBtn.disabled = true;
   showPaymentStatus("Opening Stripe checkout...");
 
   try {
@@ -1114,8 +1387,12 @@ async function startCheckout() {
   } catch (_) {
     showPaymentStatus("Could not start checkout. Try again in a moment.", true);
   } finally {
-    unlockBtn.disabled = false;
-    syncPriceLabels();
+    if (unlockBtn) {
+      unlockBtn.disabled = false;
+      syncPriceLabels();
+    }
+    if (blurUnlockBtn) blurUnlockBtn.disabled = false;
+    if (stickyUnlockBtn) stickyUnlockBtn.disabled = false;
   }
 }
 
@@ -1126,8 +1403,10 @@ async function runAnalysis(resumeText) {
   }
 
   setLoading(true, "Reviewing your resume...", COLD_START_NOTE);
+  if (resultsZone) resultsZone.hidden = false;
   showAnalysisMessage("Generating structured feedback...");
   if (scoreHero) scoreHero.hidden = true;
+  if (previewBlurWrap) previewBlurWrap.hidden = true;
   paywallBox.hidden = true;
   sharePanel.hidden = true;
   emailPanel.hidden = true;
@@ -1225,9 +1504,11 @@ form.addEventListener("submit", async (e) => {
   }
 
   setLoading(true, "Extracting text from your file...", COLD_START_NOTE);
+  if (resultsZone) resultsZone.hidden = false;
   output.textContent = "";
   showAnalysisMessage("Preparing your review...");
   if (scoreHero) scoreHero.hidden = true;
+  if (previewBlurWrap) previewBlurWrap.hidden = true;
   analyzeBtn.style.display = "none";
   paywallBox.hidden = true;
   sharePanel.hidden = true;
@@ -1388,6 +1669,8 @@ if (downloadRewriteBtn) {
 
 if (unlockBtn) unlockBtn.addEventListener("click", startCheckout);
 if (stickyUnlockBtn) stickyUnlockBtn.addEventListener("click", startCheckout);
+if (blurUnlockBtn) blurUnlockBtn.addEventListener("click", startCheckout);
+if (demoReportBtn) demoReportBtn.addEventListener("click", showDemoReport);
 if (freeLeadBtn) freeLeadBtn.addEventListener("click", saveFreeScoreEmail);
 
 if (copyReferralBtn) {
@@ -1424,6 +1707,14 @@ if (downloadReportBtn) {
 if (printReportBtn) printReportBtn.addEventListener("click", printReport);
 if (emailReportBtn) emailReportBtn.addEventListener("click", sendEmailReport);
 
+if (downloadApplicationPackBtn) {
+  downloadApplicationPackBtn.addEventListener("click", downloadApplicationPack);
+}
+
+if (printApplicationPackBtn) {
+  printApplicationPackBtn.addEventListener("click", printApplicationPack);
+}
+
 if (copyShareBtn) {
   copyShareBtn.addEventListener("click", async () => {
     if (!latestAnalysis) return;
@@ -1458,14 +1749,27 @@ if (twitterShareBtn) {
 }
 
 setupReferralLinkField();
+setupKitTabs();
+renderKitGrid(false);
 if (jobDescriptionInput) {
-  jobDescriptionInput.addEventListener("input", updateJobCharCount);
+  jobDescriptionInput.addEventListener("input", () => {
+    updateJobCharCount();
+    updateFlowFromForm();
+  });
   jobDescriptionInput.addEventListener("paste", () => {
-    setTimeout(updateJobCharCount, 0);
+    setTimeout(() => {
+      updateJobCharCount();
+      updateFlowFromForm();
+    }, 0);
   });
   updateJobCharCount();
 }
+if (resumeInput) {
+  resumeInput.addEventListener("change", updateFlowFromForm);
+}
 restoreResumeDraft();
+updateFlowFromForm();
+warmBackend();
 loadPricing();
 loadEmailStatus();
 loadContactInfo();
@@ -1477,8 +1781,10 @@ restorePremiumAccess().then(() => {
     updateCoverLetterUi(true);
     updateLinkedInUi(true);
     updateInterviewUi(true);
+    renderKitGrid(true);
   }
 });
 handleCheckoutCanceled();
 redeemReferralFromUrl();
 verifyPaymentFromUrl();
+handleDemoFromUrl();
