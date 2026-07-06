@@ -10,7 +10,8 @@ Add these environment variables:
 | `STRIPE_SECRET_KEY` | `sk_live_...` or `sk_test_...` | Stripe payments |
 | `STRIPE_PRICE_ID` | `price_...` | One-time premium report price |
 | `FRONTEND_URL` | `https://resume.motechco.ca` | Stripe redirect URLs |
-| `PREMIUM_PRICE_LABEL` | `$4.99` | Display label (optional) |
+| `LEADS_WEBHOOK_URL` | Zapier/Make URL | Optional — fires on free score capture & premium email |
+| `PREMIUM_PRICE_LABEL` | `$4.99` or `$7.99` | Display label (optional) |
 | `PREMIUM_FREE_MODE` | `true` | Bypass paywall for testing only |
 | `AI_REQUESTS_PER_MINUTE` | `6` | Max AI calls per visitor per minute (protects quota) |
 | `CONTACT_EMAIL` | `mowebsiteco@gmail.com` | Support email shown on site |
@@ -49,8 +50,17 @@ Without these, users can still **download** or **print** their report from the s
 
 ## Free vs Premium
 
-- **Free:** score + top 3 strengths preview
-- **Premium:** full report + job match + share card (after Stripe payment)
+- **Free:** score + top 3 strengths preview + optional email of score
+- **Premium:** full report + job match + rewrite + cover letter + share card (after Stripe payment)
+
+## Phase 1 growth checklist
+
+1. Set `PREMIUM_FREE_MODE=false` on Render (production)
+2. Add `RESEND_API_KEY` + `RESEND_FROM` for free score emails and premium report delivery
+3. Optional: `LEADS_WEBHOOK_URL` → Zapier → Google Sheet or Resend audience for follow-ups
+4. Submit `sitemap.xml` in Google Search Console
+5. Create Stripe promotion codes in Dashboard for referral campaigns (`allow_promotion_codes` enabled at checkout)
+6. To test a price increase: create new Stripe Price → update `STRIPE_PRICE_ID` + `PREMIUM_PRICE_LABEL` on Render
 
 ## Traffic / SEO
 

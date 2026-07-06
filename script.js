@@ -24,6 +24,16 @@ const rewritePremiumTag = document.getElementById("rewritePremiumTag");
 const rewriteUnlockBtn = document.getElementById("rewriteUnlockBtn");
 const copyRewriteBtn = document.getElementById("copyRewriteBtn");
 const downloadRewriteBtn = document.getElementById("downloadRewriteBtn");
+const coverLetterPanel = document.getElementById("coverLetterPanel");
+const coverLetterBtn = document.getElementById("coverLetterBtn");
+const coverLetterOutput = document.getElementById("coverLetterOutput");
+const coverLetterStatus = document.getElementById("coverLetterStatus");
+const coverLetterLocked = document.getElementById("coverLetterLocked");
+const coverLetterTools = document.getElementById("coverLetterTools");
+const coverLetterPremiumTag = document.getElementById("coverLetterPremiumTag");
+const coverLetterUnlockBtn = document.getElementById("coverLetterUnlockBtn");
+const copyCoverLetterBtn = document.getElementById("copyCoverLetterBtn");
+const downloadCoverLetterBtn = document.getElementById("downloadCoverLetterBtn");
 const contactHelpText = document.getElementById("contactHelpText");
 const contactEmailLink = document.getElementById("contactEmailLink");
 const sharePanel = document.getElementById("sharePanel");
@@ -46,6 +56,16 @@ const emailReportBtn = document.getElementById("emailReportBtn");
 const emailStatus = document.getElementById("emailStatus");
 const emailHelpText = document.getElementById("emailHelpText");
 const premiumBadge = document.getElementById("premiumBadge");
+const freeLeadPanel = document.getElementById("freeLeadPanel");
+const freeLeadEmail = document.getElementById("freeLeadEmail");
+const freeLeadBtn = document.getElementById("freeLeadBtn");
+const freeLeadStatus = document.getElementById("freeLeadStatus");
+const paywallPrice = document.getElementById("paywallPrice");
+const unlockBtnPrice = document.getElementById("unlockBtnPrice");
+const stickyUnlockBar = document.getElementById("stickyUnlockBar");
+const stickyUnlockBtn = document.getElementById("stickyUnlockBtn");
+const stickyUnlockText = document.getElementById("stickyUnlockText");
+const stickyUnlockPrice = document.getElementById("stickyUnlockPrice");
 
 const API_BASE = "https://backendaianalysers.onrender.com";
 const SITE_URL = "https://resume.motechco.ca";
@@ -78,6 +98,7 @@ async function fetchWithTimeout(url, options, timeoutMs = ANALYZE_TIMEOUT_MS) {
 
 let latestAnalysis = null;
 let latestRewrite = "";
+let latestCoverLetter = "";
 let pricing = { priceLabel: "$4.99", stripeConfigured: false };
 let emailDeliveryEnabled = false;
 
@@ -115,6 +136,12 @@ function renderAnalysis(data, forExport = false) {
   lines.push(...renderSections("Strengths", data.strengths || data.strengthsPreview));
 
   if (data.tier === "free" && data.locked && !forExport) {
+    if (typeof data.issuesFound === "number" && data.issuesFound > 0) {
+      lines.push(
+        `Hidden in free preview: ${data.issuesFound} improvement area${data.issuesFound === 1 ? "" : "s"} (weaknesses, keywords, or formatting).`,
+        ""
+      );
+    }
     lines.push("Premium Preview Locked:", "  • Full weaknesses breakdown");
     lines.push("  • Complete ATS keyword list");
     lines.push("  • Formatting suggestions");
@@ -202,11 +229,31 @@ function applyPremiumUi(sourceLabel) {
   premiumBadge.textContent =
     sourceLabel === "referral" ? "Referral premium unlocked" : "Premium unlocked";
   premiumBadge.title =
-    "Full report and job-tailored rewrite are unlocked on this device for up to 30 days.";
+    "Full report, resume rewrite, and cover letter are unlocked on this device for up to 30 days.";
   updatePaywallUi(true);
   updateRewriteUi(true);
+  updateCoverLetterUi(true);
   if (sharePanel) sharePanel.hidden = false;
   if (emailPanel) emailPanel.hidden = false;
+}
+
+function updateCoverLetterUi(isPremium) {
+  if (!coverLetterLocked || !coverLetterTools || !coverLetterPremiumTag) return;
+
+  if (isPremium) {
+    coverLetterLocked.hidden = true;
+    coverLetterTools.hidden = false;
+    coverLetterPremiumTag.textContent = "Unlocked";
+    coverLetterPremiumTag.className = "rewrite-tag unlocked";
+  } else {
+    coverLetterLocked.hidden = false;
+    coverLetterTools.hidden = true;
+    coverLetterPremiumTag.textContent = "Locked";
+    coverLetterPremiumTag.className = "rewrite-tag locked";
+    latestCoverLetter = "";
+    if (copyCoverLetterBtn) copyCoverLetterBtn.style.display = "none";
+    if (downloadCoverLetterBtn) downloadCoverLetterBtn.style.display = "none";
+  }
 }
 
 function updateRewriteUi(isPremium) {
@@ -279,6 +326,40 @@ function buildReportText(data) {
   return renderAnalysis(data, true);
 }
 
+function syncPriceLabels() {
+  const label = pricing.priceLabel || "$4.99";
+  if (paywallPrice) paywallPrice.textContent = label;
+  if (unlockBtnPrice) unlockBtnPrice.textContent = label;
+  if (stickyUnlockPrice) stickyUnlockPrice.textContent = label;
+}
+
+function updateStickyUnlockBar(isPremium, data) {
+  if (!stickyUnlockBar) return;
+
+  if (isPremium || !data || data.tier !== "free" || !data.locked) {
+    stickyUnlockBar.hidden = true;
+    return;
+  }
+
+  stickyUnlockBar.hidden = false;
+  if (stickyUnlockText) {
+    const scorePart =
+      typeof data.score === "number" ? `Score ${data.score}/100 — ` : "";
+    const issuesPart =
+      typeof data.issuesFound === "number" && data.issuesFound > 0
+        ? `${data.issuesFound} fixes hidden. `
+        : "";
+    stickyUnlockText.textContent = `${scorePart}${issuesPart}Unlock the full application kit`;
+  }
+}
+
+function updateFreeLeadPanel(isPremium, data) {
+  if (!freeLeadPanel) return;
+  const show = !isPremium && data && data.tier === "free" && data.locked;
+  freeLeadPanel.hidden = !show;
+  if (!show && freeLeadStatus) freeLeadStatus.textContent = "";
+}
+
 function showPaymentStatus(message, isError = false) {
   if (!paymentStatus) return;
   paymentStatus.hidden = !message;
@@ -290,10 +371,12 @@ function updatePaywallUi(isPremium) {
   paywallBox.hidden = isPremium;
 
   if (unlockBtn) {
-    unlockBtn.textContent = isPremium
-      ? "Premium unlocked"
-      : `Unlock full report — ${pricing.priceLabel}`;
     unlockBtn.disabled = isPremium;
+    if (isPremium) {
+      unlockBtn.textContent = "Premium unlocked";
+    } else {
+      syncPriceLabels();
+    }
   }
 
   if (!isPremium && !pricing.stripeConfigured) {
@@ -331,10 +414,18 @@ function updateResultsUi(data) {
 
   const isPremium = data.tier === "premium" || data.locked === false;
   if (isPremium) applyPremiumUi(getUnlockToken().startsWith("referral_") ? "referral" : "stripe");
-  else updateRewriteUi(false);
+  else {
+    updateRewriteUi(false);
+    updateCoverLetterUi(false);
+  }
   updatePaywallUi(isPremium);
+  updateStickyUnlockBar(isPremium, data);
+  updateFreeLeadPanel(isPremium, data);
   if (sharePanel) sharePanel.hidden = !isPremium;
   if (emailPanel) emailPanel.hidden = !isPremium;
+  if (!isPremium && data.tier === "free" && data.locked) {
+    paywallBox.hidden = false;
+  }
 }
 
 function isValidResumeText(text) {
@@ -442,13 +533,6 @@ async function restorePremiumAccess() {
   const token = getUnlockToken();
   if (!token) return;
 
-  if (token.startsWith("referral_")) {
-    applyPremiumUi("referral");
-    return;
-  }
-
-  if (!token.startsWith("cs_")) return;
-
   try {
     const res = await fetch(`${API_BASE}/api/resume/premium-status`, {
       method: "POST",
@@ -458,9 +542,12 @@ async function restorePremiumAccess() {
     const data = await res.json();
     if (res.ok && data.premium) {
       if (data.unlockToken) setUnlockToken(data.unlockToken);
-      applyPremiumUi("stripe");
+      applyPremiumUi(data.source === "referral" ? "referral" : "stripe");
     } else {
       setUnlockToken("");
+      updatePaywallUi(false);
+      updateRewriteUi(false);
+      updateCoverLetterUi(false);
     }
   } catch (_) {
     /* ignore */
@@ -540,6 +627,140 @@ async function generateRewrite() {
   }
 }
 
+async function generateCoverLetter() {
+  const resumeText = output?.textContent?.trim() || "";
+  const jobText = jobDescriptionInput?.value?.trim() || "";
+
+  if (!getUnlockToken()) {
+    coverLetterStatus.textContent = "Unlock premium to generate a cover letter.";
+    return;
+  }
+
+  if (!isValidResumeText(resumeText)) {
+    coverLetterStatus.textContent = "Upload your resume first.";
+    return;
+  }
+
+  if (jobText.length < 40) {
+    coverLetterStatus.textContent = `Paste the full job posting above. You have ${jobText.length} characters — need at least 40.`;
+    coverLetterStatus.className = "fine-print payment-status error";
+    return;
+  }
+
+  coverLetterBtn.disabled = true;
+  coverLetterStatus.className = "fine-print";
+  coverLetterStatus.textContent = "Writing your cover letter... this can take up to 90 seconds.";
+  coverLetterOutput.textContent = "Working...";
+
+  try {
+    const res = await fetchWithTimeout(
+      `${API_BASE}/api/resume/cover-letter`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: resumeText,
+          jobDescription: jobText,
+          unlockToken: getUnlockToken(),
+        }),
+      },
+      120000
+    );
+    const data = await res.json();
+
+    if (!res.ok) {
+      coverLetterStatus.className = "fine-print payment-status error";
+      if (res.status === 402) {
+        coverLetterStatus.textContent =
+          "Premium could not be verified on the server. Refresh the page, or pay once more if needed.";
+        setUnlockToken("");
+        updateCoverLetterUi(false);
+      } else {
+        coverLetterStatus.textContent = data.detail || data.error || "Could not generate cover letter.";
+      }
+      coverLetterOutput.textContent = "Your cover letter will appear here after you generate it.";
+      return;
+    }
+
+    latestCoverLetter = data.coverLetter || "";
+    coverLetterOutput.textContent = latestCoverLetter;
+    coverLetterStatus.className = "fine-print";
+    coverLetterStatus.textContent = data.disclaimer || "Review before sending.";
+    if (copyCoverLetterBtn) copyCoverLetterBtn.style.display = "inline-block";
+    if (downloadCoverLetterBtn) downloadCoverLetterBtn.style.display = "inline-block";
+  } catch (err) {
+    coverLetterStatus.className = "fine-print payment-status error";
+    coverLetterStatus.textContent =
+      err?.name === "AbortError"
+        ? "Timed out — wait 1 minute, then try again."
+        : "Could not generate cover letter right now. Wait 1 minute, then try again.";
+    coverLetterOutput.textContent = "Your cover letter will appear here after you generate it.";
+  } finally {
+    coverLetterBtn.disabled = false;
+  }
+}
+
+async function saveFreeScoreEmail() {
+  if (!latestAnalysis || latestAnalysis.tier !== "free") return;
+
+  const email = freeLeadEmail?.value?.trim() || "";
+  if (!email) {
+    if (freeLeadStatus) freeLeadStatus.textContent = "Enter your email address.";
+    return;
+  }
+
+  if (freeLeadBtn) freeLeadBtn.disabled = true;
+  if (freeLeadStatus) freeLeadStatus.textContent = "Sending...";
+
+  try {
+    const res = await fetch(`${API_BASE}/api/resume/save-score`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        score: latestAnalysis.score ?? null,
+        strengths: latestAnalysis.strengthsPreview || latestAnalysis.strengths || [],
+        issuesFound: latestAnalysis.issuesFound ?? null,
+        referralCode: getMyReferralCode(),
+      }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (freeLeadStatus) freeLeadStatus.textContent = data.error || "Could not send score.";
+      return;
+    }
+
+    if (freeLeadStatus) freeLeadStatus.textContent = data.message || "Check your inbox.";
+    if (typeof gtag === "function") {
+      gtag("event", "free_score_email", { score: latestAnalysis.score ?? 0 });
+    }
+  } catch (_) {
+    if (freeLeadStatus) freeLeadStatus.textContent = "Could not send right now. Try again in a moment.";
+  } finally {
+    if (freeLeadBtn) freeLeadBtn.disabled = false;
+  }
+}
+
+function handleCheckoutCanceled() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("canceled") !== "1") return;
+
+  showPaymentStatus(
+    "Checkout canceled — your free score is still saved. Unlock anytime when you are ready.",
+    false
+  );
+  paywallBox.hidden = false;
+  if (latestAnalysis) {
+    updateStickyUnlockBar(false, latestAnalysis);
+    updateFreeLeadPanel(false, latestAnalysis);
+  }
+
+  params.delete("canceled");
+  const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+  window.history.replaceState({}, "", next);
+}
+
 async function loadPricing() {
   try {
     const res = await fetch(`${API_BASE}/api/resume/pricing`);
@@ -547,9 +768,7 @@ async function loadPricing() {
   } catch (_) {
     /* keep defaults */
   }
-
-  updatePaywallUi(Boolean(getUnlockToken()));
-  updateRewriteUi(Boolean(getUnlockToken()));
+  syncPriceLabels();
 }
 
 async function redeemReferralFromUrl() {
@@ -638,7 +857,7 @@ async function startCheckout() {
     const res = await fetch(`${API_BASE}/api/resume/create-checkout`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
+      body: JSON.stringify({ referralCode: getMyReferralCode() }),
     });
     const data = await res.json();
 
@@ -655,7 +874,7 @@ async function startCheckout() {
     showPaymentStatus("Could not start checkout. Try again in a moment.", true);
   } finally {
     unlockBtn.disabled = false;
-    unlockBtn.textContent = `Unlock full report — ${pricing.priceLabel}`;
+    syncPriceLabels();
   }
 }
 
@@ -672,6 +891,8 @@ async function runAnalysis(resumeText) {
   sharePanel.hidden = true;
   emailPanel.hidden = true;
   jobMatchPanel.hidden = true;
+  if (freeLeadPanel) freeLeadPanel.hidden = true;
+  if (stickyUnlockBar) stickyUnlockBar.hidden = true;
 
   const payload = {
     text: resumeText,
@@ -771,6 +992,8 @@ form.addEventListener("submit", async (e) => {
   sharePanel.hidden = true;
   emailPanel.hidden = true;
   jobMatchPanel.hidden = true;
+  if (freeLeadPanel) freeLeadPanel.hidden = true;
+  if (stickyUnlockBar) stickyUnlockBar.hidden = true;
 
   const formData = new FormData();
   formData.append("file", fileInput.files[0]);
@@ -814,6 +1037,35 @@ if (rewriteBtn) rewriteBtn.addEventListener("click", generateRewrite);
 
 if (rewriteUnlockBtn) rewriteUnlockBtn.addEventListener("click", startCheckout);
 
+if (coverLetterBtn) coverLetterBtn.addEventListener("click", generateCoverLetter);
+
+if (coverLetterUnlockBtn) coverLetterUnlockBtn.addEventListener("click", startCheckout);
+
+if (copyCoverLetterBtn) {
+  copyCoverLetterBtn.addEventListener("click", async () => {
+    if (!latestCoverLetter) return;
+    try {
+      await navigator.clipboard.writeText(latestCoverLetter);
+      copyCoverLetterBtn.textContent = "Copied!";
+      coverLetterStatus.textContent = "Copied to clipboard. Paste into your application or email.";
+      setTimeout(() => {
+        copyCoverLetterBtn.textContent = "Copy letter";
+      }, 1800);
+    } catch (_) {
+      coverLetterOutput.focus();
+      document.getSelection()?.selectAllChildren(coverLetterOutput);
+      coverLetterStatus.textContent = "Select the text above and press Ctrl+C to copy.";
+    }
+  });
+}
+
+if (downloadCoverLetterBtn) {
+  downloadCoverLetterBtn.addEventListener("click", () => {
+    if (!latestCoverLetter) return;
+    downloadTextFile("motechco-cover-letter.txt", latestCoverLetter);
+  });
+}
+
 if (copyRewriteBtn) {
   copyRewriteBtn.addEventListener("click", async () => {
     if (!latestRewrite) return;
@@ -840,6 +1092,8 @@ if (downloadRewriteBtn) {
 }
 
 if (unlockBtn) unlockBtn.addEventListener("click", startCheckout);
+if (stickyUnlockBtn) stickyUnlockBtn.addEventListener("click", startCheckout);
+if (freeLeadBtn) freeLeadBtn.addEventListener("click", saveFreeScoreEmail);
 
 if (copyReferralBtn) {
   copyReferralBtn.addEventListener("click", async () => {
@@ -878,7 +1132,7 @@ if (emailReportBtn) emailReportBtn.addEventListener("click", sendEmailReport);
 if (copyShareBtn) {
   copyShareBtn.addEventListener("click", async () => {
     if (!latestAnalysis) return;
-    const text = `${window.MoTechCoShare.buildShareText(latestAnalysis)}\nReferral: ${getReferralShareUrl()}`;
+    const text = window.MoTechCoShare.buildShareText(latestAnalysis, getMyReferralCode());
     try {
       await navigator.clipboard.writeText(text);
       copyShareBtn.textContent = "Copied!";
@@ -894,16 +1148,17 @@ if (copyShareBtn) {
 if (linkedinShareBtn) {
   linkedinShareBtn.addEventListener("click", () => {
     if (!latestAnalysis) return;
-    const text = window.MoTechCoShare.buildShareText(latestAnalysis);
-    window.open(window.MoTechCoShare.getLinkedInShareUrl(text), "_blank", "noopener");
+    const text = window.MoTechCoShare.buildShareText(latestAnalysis, getMyReferralCode());
+    window.open(window.MoTechCoShare.getLinkedInShareUrl(text, getMyReferralCode()), "_blank", "noopener");
   });
 }
 
 if (twitterShareBtn) {
   twitterShareBtn.addEventListener("click", () => {
     if (!latestAnalysis) return;
-    const text = window.MoTechCoShare.buildShareText(latestAnalysis);
-    window.open(window.MoTechCoShare.getTwitterShareUrl(text), "_blank", "noopener");
+    const ref = getMyReferralCode();
+    const text = window.MoTechCoShare.buildShareText(latestAnalysis, ref);
+    window.open(window.MoTechCoShare.getTwitterShareUrl(text, ref), "_blank", "noopener");
   });
 }
 
@@ -920,7 +1175,11 @@ loadPricing();
 loadEmailStatus();
 loadContactInfo();
 restorePremiumAccess().then(() => {
-  if (getUnlockToken()) updateRewriteUi(true);
+  if (getUnlockToken()) {
+    updateRewriteUi(true);
+    updateCoverLetterUi(true);
+  }
 });
+handleCheckoutCanceled();
 redeemReferralFromUrl();
 verifyPaymentFromUrl();

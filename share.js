@@ -34,11 +34,18 @@
     if (line) ctx.fillText(line, x, currentY);
   }
 
-  function buildShareText(data) {
+  function buildShareUrl(refCode) {
+    if (refCode) {
+      return `${SITE_URL}/index.html?ref=${encodeURIComponent(refCode)}`;
+    }
+    return SITE_URL;
+  }
+
+  function buildShareText(data, refCode) {
     const score = typeof data.score === "number" ? data.score : "?";
     const jobScore =
       typeof data.jobMatchScore === "number" ? `\nJob match: ${data.jobMatchScore}/100` : "";
-    return `I scored ${score}/100 on my resume with MoTechCo AI.${jobScore}\n\nTry yours free: ${SITE_URL}`;
+    return `I scored ${score}/100 on my resume with MoTechCo AI.${jobScore}\n\nTry yours free: ${buildShareUrl(refCode)}`;
   }
 
   function renderScoreCard(data) {
@@ -101,16 +108,17 @@
     link.click();
   }
 
-  function getLinkedInShareUrl(text) {
-    return `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SITE_URL)}&summary=${encodeURIComponent(text)}`;
+  function getLinkedInShareUrl(text, refCode) {
+    return `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(buildShareUrl(refCode))}&summary=${encodeURIComponent(text)}`;
   }
 
-  function getTwitterShareUrl(text) {
-    return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(SITE_URL)}`;
+  function getTwitterShareUrl(text, refCode) {
+    return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(buildShareUrl(refCode))}`;
   }
 
   global.MoTechCoShare = {
     SITE_URL,
+    buildShareUrl,
     buildShareText,
     renderScoreCard,
     downloadScoreCard,

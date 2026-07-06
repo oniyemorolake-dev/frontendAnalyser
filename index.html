@@ -73,6 +73,16 @@
       </div>
       <pre id="analysisOutput" class="selectable-pre">Your AI feedback will appear here after you upload a resume.</pre>
 
+      <div id="freeLeadPanel" class="lead-capture" hidden>
+        <p class="lead-capture-title">Email my free score</p>
+        <p class="section-note">Get your score and top strengths in your inbox — plus a link to unlock the full application kit when you are ready.</p>
+        <div class="email-row">
+          <input id="freeLeadEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+          <button type="button" id="freeLeadBtn" class="btn-secondary">Send my score</button>
+        </div>
+        <p id="freeLeadStatus" class="fine-print"></p>
+      </div>
+
       <div id="quotaHelp" class="quota-help" hidden>
         <h4>Google AI limit reached — what to do</h4>
         <ol>
@@ -84,10 +94,16 @@
       </div>
 
       <div id="paywallBox" class="paywall-inline" hidden>
-        <p class="paywall-title">Unlock the full premium report</p>
-        <p class="section-note">Includes weaknesses, ATS keyword gaps, formatting fixes, job-match detail, and a job-tailored resume you can copy and paste.</p>
-        <p class="price-tag compact">$4.99 <span>one-time</span></p>
-        <button type="button" id="unlockBtn" class="btn-primary">Unlock full report — $4.99</button>
+        <p class="paywall-title">Unlock the full application kit</p>
+        <p class="section-note">One payment unlocks everything: full report, job-match keywords, tailored resume rewrite, cover letter, and export tools.</p>
+        <ul class="paywall-list">
+          <li>Weaknesses + ATS keyword gaps</li>
+          <li>Job-tailored resume rewrite</li>
+          <li>Job-tailored cover letter</li>
+          <li>Download, print, email &amp; share</li>
+        </ul>
+        <p class="price-tag compact"><span id="paywallPrice">$4.99</span> <span>one-time · 30 days on this device</span></p>
+        <button type="button" id="unlockBtn" class="btn-primary">Unlock application kit — <span id="unlockBtnPrice">$4.99</span></button>
         <p id="paymentStatus" class="payment-status" hidden></p>
         <p class="fine-print">Secure checkout via Stripe · By paying you agree to our <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a></p>
       </div>
@@ -143,6 +159,34 @@
       </div>
     </section>
 
+    <section id="coverLetterPanel" class="panel rewrite-panel">
+      <div class="rewrite-head">
+        <div>
+          <p class="eyebrow dark">Premium feature</p>
+          <h3>Generate a cover letter for this job</h3>
+          <p class="section-note">Uses your resume facts and the job posting above. Copy into your application or email.</p>
+        </div>
+        <span id="coverLetterPremiumTag" class="rewrite-tag locked">Locked</span>
+      </div>
+
+      <div id="coverLetterLocked" class="rewrite-locked">
+        <p>Unlock premium to generate a tailored cover letter — included with the same one-time payment.</p>
+        <button type="button" id="coverLetterUnlockBtn" class="btn-secondary">Unlock premium — $4.99</button>
+      </div>
+
+      <div id="coverLetterTools" hidden>
+        <div class="actions">
+          <button type="button" id="coverLetterBtn" class="btn-primary">Generate cover letter</button>
+          <button type="button" id="copyCoverLetterBtn" class="btn-secondary" style="display: none;">Copy letter</button>
+          <button type="button" id="downloadCoverLetterBtn" class="btn-secondary" style="display: none;">Download .txt</button>
+        </div>
+        <p id="coverLetterStatus" class="fine-print"></p>
+        <label class="field-label" for="coverLetterOutput">Cover letter — ready to copy</label>
+        <pre id="coverLetterOutput" tabindex="0">Your cover letter will appear here after you generate it.</pre>
+        <p class="fine-print rewrite-disclaimer">Review and add your contact details before sending. See <a href="terms.html">Terms</a>.</p>
+      </div>
+    </section>
+
     <section id="sharePanel" class="panel" hidden>
       <h3>Export &amp; share</h3>
       <div class="share-actions">
@@ -173,7 +217,7 @@
 
     <section class="panel referral-panel">
       <h3>Share MoTechCo with a friend</h3>
-      <p class="section-note">Give a friend one free premium report for 24 hours.</p>
+      <p class="section-note">Your friend gets <strong>24 hours of premium free</strong> when they open your link. You help them; they get the full application kit to try.</p>
       <ol class="referral-steps">
         <li>Click <strong>Copy link</strong> below.</li>
         <li>Send it by text, WhatsApp, or email.</li>
@@ -186,6 +230,11 @@
       <p id="referralStatus" class="fine-print"></p>
     </section>
   </main>
+
+  <div id="stickyUnlockBar" class="sticky-unlock" hidden>
+    <p id="stickyUnlockText">Unlock the full application kit</p>
+    <button type="button" id="stickyUnlockBtn" class="btn-primary">Unlock — <span id="stickyUnlockPrice">$4.99</span></button>
+  </div>
 
   <footer class="site-footer">
     <p>© 2026 MoTechCo · <a href="landing.html">Home</a> · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></p>
