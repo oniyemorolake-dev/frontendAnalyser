@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-14JS9PFD1C"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag("js", new Date());
+    gtag("config", "G-14JS9PFD1C");
+  </script>
+  <title>Report a problem | MoTechCo</title>
+  <meta name="description" content="Something not working on MoTechCo? Tell us what happened and we'll fix it — a real person reads every report." />
+  <link rel="canonical" href="https://resume.motechco.ca/report.html" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="phase4.css" />
+</head>
+<body class="landing-page">
+  <nav class="top-nav">
+    <a class="brand" href="landing.html"><span class="brand-mark">M</span> MoTechCo <span class="brand-sparkle" aria-hidden="true">✨</span></a>
+    <div class="nav-links">
+      <a href="landing.html">Home</a>
+      <a href="index.html">Analyzer</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </nav>
+
+  <section class="page-hero">
+    <div class="page-hero-inner">
+      <p class="eyebrow">Report a problem</p>
+      <h1>Something not working? Tell us.</h1>
+      <p class="hero-copy">If a score looked off, a payment didn't go through, or anything felt broken — let us know. A real person reads every report and we'll get it sorted.</p>
+    </div>
+  </section>
+
+  <section class="seo-copy">
+    <form id="reportForm" class="partner-form" action="https://formspree.io/f/meebdzgj" method="POST">
+      <div class="partner-form-row">
+        <label class="field-label" for="reportName">Your name (optional)</label>
+        <input id="reportName" name="name" type="text" placeholder="First name is fine" />
+      </div>
+      <div class="partner-form-row">
+        <label class="field-label" for="reportEmail">Email (so we can reply)</label>
+        <input id="reportEmail" name="email" type="email" required placeholder="you@example.com" />
+      </div>
+      <div class="partner-form-row">
+        <label class="field-label" for="reportType">What kind of problem?</label>
+        <select id="reportType" name="problemType">
+          <option value="bug">Something is broken (bug)</option>
+          <option value="payment">Payment or unlock issue</option>
+          <option value="wrong-result">My result looked wrong</option>
+          <option value="feature">Feature request / idea</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="partner-form-row">
+        <label class="field-label" for="reportMessage">What happened?</label>
+        <textarea id="reportMessage" name="message" rows="6" required placeholder="Tell us what you were doing and what went wrong. The more detail, the faster we can fix it."></textarea>
+      </div>
+      <input type="hidden" id="reportContext" name="pageContext" value="" />
+      <input type="hidden" name="_subject" value="MoTechCo — Problem report" />
+      <button type="submit" id="reportSubmitBtn" class="btn-primary">Send report</button>
+      <p id="reportStatus" class="fine-print"></p>
+    </form>
+    <p class="fine-print">Prefer email? Reach us at <a href="mailto:mowebsiteco@gmail.com?subject=MoTechCo%20problem%20report">mowebsiteco@gmail.com</a>.</p>
+  </section>
+
+  <footer class="footer site-footer landing-footer">
+    <p>© 2026 MoTechCo — Built with care in lilac &amp; purple 💜</p>
+    <p class="footer-links">
+      <a href="landing.html">Home</a> ·
+      <a href="index.html">Analyzer</a> ·
+      <a href="about.html">About</a> ·
+      <a href="contact.html">Contact</a> ·
+      <a href="privacy.html">Privacy</a> ·
+      <a href="terms.html">Terms</a>
+    </p>
+  </footer>
+
+  <script>
+    (function () {
+      var form = document.getElementById("reportForm");
+      var status = document.getElementById("reportStatus");
+      var submitBtn = document.getElementById("reportSubmitBtn");
+      var context = document.getElementById("reportContext");
+
+      try {
+        var ref = document.referrer || "direct";
+        context.value = "Referrer: " + ref + " | UA: " + navigator.userAgent;
+      } catch (e) {
+        /* ignore */
+      }
+
+      if (!form) return;
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        status.className = "fine-print";
+        status.textContent = "Sending your report...";
+        submitBtn.disabled = true;
+
+        try {
+          var res = await fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),
+            headers: { Accept: "application/json" },
+          });
+
+          if (res.ok) {
+            form.reset();
+            status.className = "fine-print";
+            status.textContent =
+              "Thanks — we got your report and will look into it. If you left an email, we'll reply.";
+            if (typeof gtag === "function") {
+              gtag("event", "problem_report_sent");
+            }
+          } else {
+            var data = await res.json().catch(function () {
+              return null;
+            });
+            status.className = "fine-print payment-status error";
+            status.textContent =
+              data && data.errors && data.errors.length
+                ? data.errors.map(function (x) { return x.message; }).join(", ")
+                : "Could not send right now. Please email mowebsiteco@gmail.com instead.";
+          }
+        } catch (err) {
+          status.className = "fine-print payment-status error";
+          status.textContent =
+            "Could not send right now. Please email mowebsiteco@gmail.com instead.";
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
