@@ -161,7 +161,7 @@ let latestCoverLetter = "";
 let latestLinkedInAbout = "";
 let latestInterviewPrep = "";
 let pricing = {
-  priceLabel: "$6.99",
+  priceLabel: "$4.99",
   compareAtLabel: "$29/mo elsewhere",
   launchNote: "One job. One payment. No monthly subscription.",
   stripeConfigured: false,

@@ -21,7 +21,7 @@
       "Include driver's license in skills if you have one",
     ],
     issuesFound: 6,
-    upgradeMessage: "Unlock your full application kit for $6.99.",
+    upgradeMessage: "Unlock your full application kit for $4.99.",
   };
 
   const BLUR_PREVIEW = {

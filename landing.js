@@ -6,7 +6,7 @@
     const compareEls = document.querySelectorAll("[data-compare-label]");
     const launchNoteEls = document.querySelectorAll("[data-launch-note]");
 
-    let label = "$6.99";
+    let label = "$4.99";
     let compareAt = "$29/mo elsewhere";
     let launchNote = "One job. One payment. No subscription.";
 

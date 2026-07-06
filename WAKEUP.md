@@ -24,7 +24,7 @@ Everything below was built and pushed while you slept. Your live site should upd
 - Cold-start UX: backend warm-up + progress messages for Render wake-up
 
 ### Pricing
-- Launch price: **$6.99 one-time** (vs “$29/mo elsewhere” on landing)
+- Launch price: **$4.99 one-time** (vs “$29/mo elsewhere” on landing)
 - Backend default label updated — see Stripe step below if checkout amount differs
 
 ---
@@ -46,13 +46,11 @@ Everything below was built and pushed while you slept. Your live site should upd
 ## Your action items (in order)
 
 ### 1. Stripe price — 5 minutes
-If checkout still charges **$4.99**, either:
-- Create a **$6.99 CAD** one-time Price in [Stripe Dashboard](https://dashboard.stripe.com/products) → update `STRIPE_PRICE_ID` on Render, **or**
-- Set `PREMIUM_PRICE_LABEL=$4.99` on Render to match existing price (label only changes)
+Launch price is **$4.99** everywhere on the site and backend. Your existing Stripe price is CA$4.99, so no change is needed — the site and checkout now match.
 
-Also add on Render (optional):
+Optional on Render (only if you want to tweak the comparison text):
 ```
-PREMIUM_PRICE_LABEL=$6.99
+PREMIUM_PRICE_LABEL=$4.99
 COMPARE_AT_LABEL=$29/mo elsewhere
 ```
 
@@ -96,14 +94,14 @@ On [Render dashboard](https://dashboard.render.com) → backend service:
 **Body:**
 > I built a tool for people tired of $30/mo resume subscriptions.
 > Paste the job ad + upload PDF → free score + 3 fixes to try.
-> One-time $6.99 unlocks full report, rewrite, cover letter, LinkedIn About, interview prep for that job.
+> One-time $4.99 unlocks full report, rewrite, cover letter, LinkedIn About, interview prep for that job.
 > https://resume.motechco.ca/index.html?demo=1 (sample report, no upload)
 > Feedback welcome — still improving it.
 
 ### LinkedIn post
 > Sent 40 applications and heard nothing back?
 > I built MoTechCo — paste the job posting, get your resume score + missing keywords free.
-> One payment ($6.99) for the full application kit — not another monthly tool.
+> One payment ($4.99) for the full application kit — not another monthly tool.
 > Try the sample report: https://resume.motechco.ca/index.html?demo=1
 
 ### Coach outreach (5 DMs this week)
@@ -136,7 +134,7 @@ On [Render dashboard](https://dashboard.render.com) → backend service:
 | Nav missing on analyzer | You’re on old deploy — check Netlify publish log |
 | Analysis times out | Wait 60s, click Run again (Render cold start) |
 | “Premium unlocked” but sticky bar shows | Clear site data / check PREMIUM_FREE_MODE on Render |
-| Checkout wrong price | Update STRIPE_PRICE_ID to $6.99 product |
+| Checkout wrong price | Confirm STRIPE_PRICE_ID points to your CA$4.99 product |
 
 ---
 
