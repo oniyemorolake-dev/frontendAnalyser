@@ -258,6 +258,8 @@ function applyPremiumUi(sourceLabel) {
   updateCoverLetterUi(true);
   updateLinkedInUi(true);
   updateInterviewUi(true);
+  if (stickyUnlockBar) stickyUnlockBar.hidden = true;
+  if (freeLeadPanel) freeLeadPanel.hidden = true;
   if (sharePanel) sharePanel.hidden = false;
   if (emailPanel) emailPanel.hidden = false;
 }
@@ -532,6 +534,7 @@ function restoreResumeDraft() {
     jobDescriptionInput.value = savedJob;
   }
 
+  updateJobCharCount();
   return savedResume;
 }
 
@@ -610,11 +613,13 @@ async function restorePremiumAccess() {
       applyPremiumUi(data.source === "referral" ? "referral" : "stripe");
     } else {
       setUnlockToken("");
+      if (premiumBadge) premiumBadge.hidden = true;
       updatePaywallUi(false);
       updateRewriteUi(false);
       updateCoverLetterUi(false);
       updateLinkedInUi(false);
       updateInterviewUi(false);
+      if (stickyUnlockBar) stickyUnlockBar.hidden = true;
     }
   } catch (_) {
     /* ignore */
@@ -1464,6 +1469,8 @@ restoreResumeDraft();
 loadPricing();
 loadEmailStatus();
 loadContactInfo();
+if (premiumBadge) premiumBadge.hidden = true;
+if (stickyUnlockBar) stickyUnlockBar.hidden = true;
 restorePremiumAccess().then(() => {
   if (getUnlockToken()) {
     updateRewriteUi(true);
