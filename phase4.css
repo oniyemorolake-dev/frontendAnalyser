@@ -197,6 +197,93 @@
   text-align: center;
 }
 
+/* Testimonials / reviews */
+.reviews-section {
+  text-align: center;
+}
+
+.reviews-section h2 {
+  color: var(--brand);
+  margin-bottom: 6px;
+}
+
+.reviews-subtitle {
+  margin: 0 auto 8px;
+  max-width: 520px;
+  color: var(--ink-soft);
+}
+
+.reviews-grid {
+  text-align: left;
+}
+
+.review-card {
+  background: #fff;
+  border: 1px solid #e5d6f2;
+  border-radius: calc(var(--radius) + 2px);
+  padding: 22px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.review-stars {
+  color: #e0a53a;
+  font-size: 17px;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.review-stars .star-empty {
+  color: #e0d3ec;
+}
+
+.review-quote {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.review-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.review-avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: "Fraunces", serif;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #7a3ea1, #5b2d82);
+}
+
+.review-name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.review-role {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 600px) {
+  .review-card {
+    padding: 18px;
+  }
+}
+
 .nav-links .status-pill {
   margin-right: 12px;
   vertical-align: middle;
